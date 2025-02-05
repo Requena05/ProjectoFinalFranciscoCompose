@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ProjectoFinalFranciscoCompose</string>
+    <string name="title_activity_juego">JuegoActivity</string>
+    <string name="title_activity_registro">RegistroActivity</string>
+</resources>
