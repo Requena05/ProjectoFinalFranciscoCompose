@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "256448779423",
+    "firebase_url": "https://projectofinal-e636e-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "projectofinal-e636e",
+    "storage_bucket": "projectofinal-e636e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:256448779423:android:bbca05a39d53a770847eaa",
+        "android_client_info": {
+          "package_name": "com.example.projectofinalfranciscocompose"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjsvinCKSKMs0VJrhvLXUqxCku9kWSVbA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

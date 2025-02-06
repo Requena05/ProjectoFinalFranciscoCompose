@@ -54,7 +54,6 @@ class MainActivity : ComponentActivity() {
             ProjectoFinalFranciscoComposeTheme {
                 Scaffold(modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black)
                     .fillMaxSize()) { innerPadding ->
                     Column(
                         Modifier
@@ -73,27 +72,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MenuPrincipal( modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    Column {
-        Text(
-            text = "Bienvenido al UNO!!!",
-            modifier = modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            fontSize = 34.sp,
-            lineHeight = 32.sp,
-            letterSpacing = 2.9.sp,
-            color = Color.White,
-            style = TextStyle(color = Color.White)
-        )
-        Row (
+    Row (
             modifier = Modifier
-                .padding(20.dp).fillMaxSize()){
+               .fillMaxSize()){
             Column{
                 //tiene que ir un boton invisible debajo de la imagen
 
                 IconButton(onClick = {
                     val intent = Intent(context, RegistroActivity::class.java)
                     context.startActivity(intent)
-
                 },
                 modifier = Modifier.fillMaxSize()) {
                     Image(
@@ -105,7 +92,7 @@ fun MenuPrincipal( modifier: Modifier = Modifier) {
             }
         }
 
-    }
+
 }
 
 @Preview(showBackground = true, showSystemUi = true)
