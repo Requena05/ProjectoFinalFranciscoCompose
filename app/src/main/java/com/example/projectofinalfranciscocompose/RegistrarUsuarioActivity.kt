@@ -1,6 +1,8 @@
 package com.example.projectofinalfranciscocompose
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -9,17 +11,26 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,17 +38,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.projectofinalfranciscocompose.Util.Companion.escribirUsuario
 import com.example.projectofinalfranciscocompose.Util.Companion.existeUsuario
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
+import com.google.firebase.FirebaseApp
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlin.text.format
+import androidx.compose.material3.DatePicker as DatePicker
 
 class RegistrarUsuarioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,9 +65,10 @@ class RegistrarUsuarioActivity : ComponentActivity() {
         setContent {
             ProjectoFinalFranciscoComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Column(Modifier
-                        .fillMaxSize()
-                        .background(colorResource(R.color.fondo))){
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .background(colorResource(R.color.fondo))){
                         ModoregistroUsuario(
                             modifier = Modifier.padding(innerPadding)
                         )
@@ -60,6 +79,8 @@ class RegistrarUsuarioActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("SimpleDateFormat")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModoregistroUsuario( modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -76,7 +97,11 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
         var text_email by remember { mutableStateOf(" ") }
         var text_password by remember { mutableStateOf(" ") }
         var text_fechaNacimiento by remember { mutableStateOf(" ") }
-        var db_ref: DatabaseReference= FirebaseDatabase.getInstance().getReference()
+        FirebaseApp.initializeApp(context)
+        lateinit var db_ref: DatabaseReference
+        db_ref = FirebaseDatabase.getInstance().getReference()
+
+
         var Usuarios: MutableList<UsuarioLogin> = mutableListOf()
         db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
             for (i in it.children) {
@@ -92,25 +117,68 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
             onValueChange = { text_name = it },
             label = { Text("Nombre")},
             //elevation 4 dp
-
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .wrapContentWidth()
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 10.dp),
 
             )
-        TextField(
-            value = text_fechaNacimiento,
-            onValueChange = { text_fechaNacimiento = it },
-            label = { Text("Fecha de nacimiento")},
-            //elevation 4 dp
 
-            modifier = Modifier
-                .wrapContentWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(bottom = 10.dp),
+            var showDatePicker by remember { mutableStateOf(false) }
+            var selectedDate by remember { mutableStateOf("") }
+            val datePickerState = rememberDatePickerState()
 
-            )
+            Column (Modifier.align(Alignment.CenterHorizontally)
+                .padding(bottom = 10.dp), horizontalAlignment = Alignment.CenterHorizontally){
+                Button(onClick = { showDatePicker = true }, modifier = Modifier.padding(8.dp),
+                    colors = ButtonDefaults.buttonColors(Color.White),
+                    elevation = ButtonDefaults.buttonElevation(10.dp),
+                    border = ButtonDefaults.outlinedButtonBorder) {
+                    Text("Seleccionar Fecha de Nacimiento", color = Color.Black)
+                }
+                if (selectedDate.isNotEmpty()) {
+                    Text(
+                        text = "Fecha seleccionada: $selectedDate",
+                        modifier = Modifier
+                            .background(Color.White)
+                            .border(1.dp, Color.Black)
+                            .padding(16.dp),
+                        fontSize = 18.sp,
+                    )
+                }
+            }
+
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        Button(onClick = {
+                            showDatePicker = false
+                            val selectedDateMillis = datePickerState.selectedDateMillis
+                            if (selectedDateMillis != null) {
+                                val formatter = SimpleDateFormat("dd/MM/yyyy")
+                                selectedDate = formatter.format(java.util.Date(selectedDateMillis))
+                            }
+                        }) {
+                            Text("Confirmar")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showDatePicker = false }) {
+                            Text("Cancelar")
+                        }
+                    }
+                ) {
+                    DatePicker(
+                        state = datePickerState,
+                        modifier = Modifier.padding(bottom = 10.dp),
+                        title = { Text("Fecha de Nacimiento") }
+                    )
+
+                }
+        }
+
 
         TextField(
             value = text_username,
@@ -180,17 +248,28 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
         }
 }
 
+
+
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GreetingPreview3() {
+    var contexto=LocalContext.current
+
     ProjectoFinalFranciscoComposeTheme {
+
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Column(Modifier
-                .fillMaxSize()
-                .background(colorResource(R.color.fondo))){
+            Column(
+
+                Modifier
+                    .fillMaxSize()
+                    .background(colorResource(R.color.fondo))){
+                FirebaseApp.initializeApp(contexto)
+                FirebaseDatabase.getInstance().getReference().child("Uno")
                 ModoregistroUsuario(
                     modifier = Modifier.padding(innerPadding)
                 )
+
             }
         }
     }

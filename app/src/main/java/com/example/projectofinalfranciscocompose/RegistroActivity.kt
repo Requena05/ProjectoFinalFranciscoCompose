@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.projectofinalfranciscocompose.Util.Companion.existeUsuario
@@ -104,6 +106,7 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
             value = text_password,
             onValueChange = { text_password = it },
             label = { Text("Password")},
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier
                 .wrapContentWidth()
                 .align(Alignment.CenterHorizontally)
@@ -143,7 +146,7 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                         Log.d("Usuarios", Usuarios.size.toString())
                         Log.d("Existe", existeUsuario(Usuarios, text_username).toString())
 
-                        if(Util.existeUsuario(Usuarios,text_username)){
+                        if(existeUsuario(Usuarios,text_username)){
                             val intent = Intent(context, JuegoActivity::class.java)
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                             context.startActivity(intent)

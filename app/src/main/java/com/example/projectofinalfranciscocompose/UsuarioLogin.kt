@@ -9,6 +9,9 @@ data class UsuarioLogin(
     val email: String?="",
     val password: String?="",
     val fechaNacimiento: String?="",
-    val id: String?=""
+    val tipo: Int?=0,
+
+    //tipo 1 será un jugador y tipo 2 será un administrador
+
     ): Serializable
 
