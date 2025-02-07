@@ -13,14 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
 
-class JuegoActivity : ComponentActivity() {
+class MenuDelJuegoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ProjectoFinalFranciscoComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    SeleccionarCartas(
+                    MenuOpciones(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -30,9 +30,9 @@ class JuegoActivity : ComponentActivity() {
 }
 
 @Composable
-fun SeleccionarCartas( modifier: Modifier = Modifier) {
+fun MenuOpciones(modifier: Modifier = Modifier) {
     Text(
-        text = "Hello !",
+        text = "Hello ",
         modifier = modifier
     )
 }
@@ -40,9 +40,10 @@ fun SeleccionarCartas( modifier: Modifier = Modifier) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GreetingPreview() {
+
     ProjectoFinalFranciscoComposeTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            SeleccionarCartas(
+            MenuOpciones(
                 modifier = Modifier.padding(innerPadding)
             )
         }

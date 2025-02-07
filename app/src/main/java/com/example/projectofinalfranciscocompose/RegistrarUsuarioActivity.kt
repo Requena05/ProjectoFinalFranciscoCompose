@@ -1,6 +1,8 @@
 package com.example.projectofinalfranciscocompose
 
 import android.annotation.SuppressLint
+import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
@@ -26,7 +28,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -52,13 +57,19 @@ import com.example.projectofinalfranciscocompose.Util.Companion.escribirUsuario
 import com.example.projectofinalfranciscocompose.Util.Companion.existeUsuario
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
 import com.google.firebase.FirebaseApp
+
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlin.text.format
 import androidx.compose.material3.DatePicker as DatePicker
 
+
+lateinit var db_ref: DatabaseReference
+
 class RegistrarUsuarioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        db_ref = FirebaseDatabase.getInstance().reference
+
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -92,14 +103,12 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(220.dp)
         )
-        var text_name by remember { mutableStateOf(" ") }
-        var text_username by remember { mutableStateOf(" ") }
-        var text_email by remember { mutableStateOf(" ") }
-        var text_password by remember { mutableStateOf(" ") }
-        var text_fechaNacimiento by remember { mutableStateOf(" ") }
-        FirebaseApp.initializeApp(context)
-        lateinit var db_ref: DatabaseReference
-        db_ref = FirebaseDatabase.getInstance().getReference()
+        var text_name by remember { mutableStateOf("") }
+        var text_username by remember { mutableStateOf("") }
+        var text_email by remember { mutableStateOf("") }
+        var text_password by remember { mutableStateOf("") }
+
+
 
 
         var Usuarios: MutableList<UsuarioLogin> = mutableListOf()
@@ -129,8 +138,10 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
             var selectedDate by remember { mutableStateOf("") }
             val datePickerState = rememberDatePickerState()
 
-            Column (Modifier.align(Alignment.CenterHorizontally)
-                .padding(bottom = 10.dp), horizontalAlignment = Alignment.CenterHorizontally){
+            Column (
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 10.dp), horizontalAlignment = Alignment.CenterHorizontally){
                 Button(onClick = { showDatePicker = true }, modifier = Modifier.padding(8.dp),
                     colors = ButtonDefaults.buttonColors(Color.White),
                     elevation = ButtonDefaults.buttonElevation(10.dp),
@@ -211,13 +222,61 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
                 .padding(bottom = 10.dp),
 
             )
+        //Necesito un Spinner para seleccionar el tipo de usuario
+        var expanded by remember { mutableStateOf(false) }
+        var selectedOptionText by remember { mutableStateOf("Elige el tipo de Usuario") }
+        val options = listOf("Usuario Normal", "Usuario Administrador")
+        var tipo=0
+        Column(modifier = Modifier.padding(16.dp).align(Alignment.CenterHorizontally)) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    modifier = Modifier.menuAnchor(),
+                    readOnly = true,
+                    value = selectedOptionText,
+                    onValueChange = { },
+                    label = { Text("Tipo de Usuario") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    options.forEach { it ->
+                        DropdownMenuItem(
+                            text = { Text(it) },
+                            onClick = {
+                                selectedOptionText = it
+                                expanded = false
+                                Log.d("Tipo", selectedOptionText)
+
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+
+
+                        )
+
+                    }
+                }
+            }
+        }
         Row(modifier = Modifier
             .wrapContentWidth()
             .align(Alignment.CenterHorizontally)) {
             Button(onClick = {
-                val usuario = UsuarioLogin(text_name, text_username, text_email, text_password, text_fechaNacimiento)
+                Log.d("Tipo22", selectedOptionText)
 
-                if(text_email.isEmpty() || text_password.isEmpty() || text_username.isEmpty() || text_name.isEmpty() || text_fechaNacimiento.isEmpty()){
+                if (selectedOptionText.equals("Usuario Administrador")){
+                    tipo = 2
+                }else {
+                tipo = 1
+                }
+                val usuario = UsuarioLogin(text_name, text_username, text_email, text_password, selectedDate,tipo)
+                Log.d("tipoUSUS",usuario.tipo.toString())
+                if(text_email.isEmpty() || text_password.isEmpty() || text_username.isEmpty() || text_name.isEmpty() || selectedDate.isEmpty()){
                     Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
 
                 }else if(text_password.length <8){
@@ -229,12 +288,12 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
                     Toast.makeText(context, "El nombre debe tener al menos 3 caracteres", Toast.LENGTH_SHORT).show()
                 }else{
 
-                         if(existeUsuario(Usuarios, text_username)){
+                         if(existeUsuario(Usuarios, text_username,)){
                              Toast.makeText(context, "El usuario ya existe", Toast.LENGTH_SHORT).show()
                          }else{
 
                             escribirUsuario(db_ref, text_username, usuario)
-                            val intent = Intent(context, RegistroActivity::class.java)
+                            val intent = Intent(context, MainActivity::class.java)
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                             context.startActivity(intent)
                             Toast.makeText(context, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()
@@ -254,8 +313,9 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GreetingPreview3() {
+    db_ref = FirebaseDatabase.getInstance().reference
     var contexto=LocalContext.current
-
+    FirebaseApp.initializeApp(contexto.applicationContext)
     ProjectoFinalFranciscoComposeTheme {
 
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -264,8 +324,6 @@ fun GreetingPreview3() {
                 Modifier
                     .fillMaxSize()
                     .background(colorResource(R.color.fondo))){
-                FirebaseApp.initializeApp(contexto)
-                FirebaseDatabase.getInstance().getReference().child("Uno")
                 ModoregistroUsuario(
                     modifier = Modifier.padding(innerPadding)
                 )
