@@ -147,7 +147,7 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                         Log.d("Existe", existeUsuario(Usuarios, text_username).toString())
 
                         if(existeUsuario(Usuarios,text_username)){
-                            val intent = Intent(context, MenuDelJuegoActivity::class.java)
+                            val intent = Intent(context, MenuDelJuegoUsuarioActivity::class.java)
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                             context.startActivity(intent)
 

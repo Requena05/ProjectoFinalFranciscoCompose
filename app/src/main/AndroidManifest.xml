@@ -13,6 +13,11 @@
         android:theme="@style/Theme.ProjectoFinalFranciscoCompose"
         tools:targetApi="31">
         <activity
+            android:name=".MenuDelJuegoAdministradorActivity"
+            android:exported="false"
+            android:label="@string/title_activity_menu_del_juego_administrador"
+            android:theme="@style/Theme.ProjectoFinalFranciscoCompose" />
+        <activity
             android:name=".MenuDelJuegoActivity"
             android:exported="false"
             android:label="@string/title_activity_menu_del_juego"

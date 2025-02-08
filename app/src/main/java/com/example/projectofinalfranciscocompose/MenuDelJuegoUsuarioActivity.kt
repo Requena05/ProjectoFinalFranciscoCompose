@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
 
-class MenuDelJuegoActivity : ComponentActivity() {
+class MenuDelJuegoUsuarioActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
