@@ -145,11 +145,34 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                         Log.d("Usuarios", Usuarios.toString())
                         Log.d("Usuarios", Usuarios.size.toString())
                         Log.d("Existe", existeUsuario(Usuarios, text_username).toString())
-
+                        var esValido = false
                         if(existeUsuario(Usuarios,text_username)){
-                            val intent = Intent(context, MenuDelJuegoUsuarioActivity::class.java)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                            context.startActivity(intent)
+                            //Se comprueba que tipo de usuario es para redirigir a la pantalla correspondiente
+                            db_ref.child("Uno").child("Usuarios").child(text_username).get().addOnSuccessListener {
+                                val usuario = it.getValue(UsuarioLogin::class.java)
+                                Log.d("Usuario", usuario.toString())
+                                if (usuario != null) {
+                                    if(usuario.tipo == 1 && usuario.username.toString().equals(text_username)){
+                                        esValido=true
+                                        }else{
+                                        esValido=false
+                                    }
+                                }
+                                if(esValido){
+                                    val intent = Intent(context, MenuDelJuegoUsuarioActivity::class.java)
+                                    //que no se vea la animación de transición
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                                    context.startActivity(intent)
+                                }else{
+                                    val intent = Intent(context, MenuDelJuegoAdministradorActivity::class.java)
+                                    //que no se vea la animación de transición
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                                    context.startActivity(intent)
+
+                                }
+                            }
+
+
 
                         }else{
                             Toast.makeText(context, "El usuario no existe", Toast.LENGTH_SHORT).show()
