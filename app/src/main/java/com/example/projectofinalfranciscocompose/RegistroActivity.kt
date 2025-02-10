@@ -139,7 +139,10 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                     db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
                         for (i in it.children) {
                             val usuario = i.getValue(UsuarioLogin::class.java)
-                            if (usuario != null ) {
+                            if (usuario != null &&
+                                usuario.username.toString().equals(text_username) &&
+                               usuario.password.toString().equals(text_password) &&
+                               usuario.email.toString().equals(text_email) ) {
                                 Usuarios.add(usuario)
                             }
 
@@ -147,31 +150,32 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                         Log.d("Usuarios", Usuarios.toString())
                         Log.d("Usuarios", Usuarios.size.toString())
                         Log.d("Existe", existeUsuario(Usuarios, text_username).toString())
-                        var esValido = false
                         if(existeUsuario(Usuarios,text_username)){
                             //Se comprueba que tipo de usuario es para redirigir a la pantalla correspondiente
                             db_ref.child("Uno").child("Usuarios").child(text_username).get().addOnSuccessListener {
-                                val usuario = it.getValue(UsuarioLogin::class.java)
+                                val usuario=Usuarios.find { it.username == text_username }
                                 Log.d("Usuario", usuario.toString())
                                 if (usuario != null) {
-                                    if(usuario.tipo == 1 && usuario.username.toString().equals(text_username)){
-                                        esValido=true
-                                        }else{
-                                        esValido=false
+                                    if(usuario.tipo ==1 && usuario.username.toString().equals(text_username) && usuario.password.toString().equals(text_password) && usuario.email.toString().equals(text_email) ){
+                                        val intent = Intent(context, MenuDelJuegoUsuarioActivity::class.java)
+                                        context.startActivity(intent)
+
+                                        }else if (usuario.tipo==2 &&  usuario.username.toString().equals(text_username) && usuario.password.toString().equals(text_password) && usuario.email.toString().equals(text_email)){
+                                        val intent = Intent(context, MenuDelJuegoAdministradorActivity::class.java)
+                                        //que no se vea la animación de transición
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                                        context.startActivity(intent)
+                                    }else{
+                                        Toast.makeText(context,"Username, Email o Contraseña incorrectos", Toast.LENGTH_SHORT).show()
                                     }
-                                }
-                                if(esValido){
-                                    val intent = Intent(context, MenuDelJuegoUsuarioActivity::class.java)
-                                    //que no se vea la animación de transición
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                                    context.startActivity(intent)
-                                }else{
-                                    val intent = Intent(context, MenuDelJuegoAdministradorActivity::class.java)
-                                    //que no se vea la animación de transición
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                                    context.startActivity(intent)
+
+
+
+
+
 
                                 }
+
                             }
 
 

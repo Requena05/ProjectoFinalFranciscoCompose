@@ -5,6 +5,7 @@
     <string name="title_activity_registrar_usuario">RegistrarUsuarioActivity</string>
     <string name="title_activity_menu_del_juego">MenuDelJuegoActivity</string>
     <string name="title_activity_menu_del_juego_administrador">MenuDelJuegoAdministradorActivity
-    </string>
+        </string>
+    <string name="title_activity_menu_del_juego_usuario">MenuDelJuegoUsuarioActivity</string>
     <string name="title_activity_añadir_carta">AñadirCartaActivity</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.projectofinalfranciscocompose
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Layout
 import android.view.View
@@ -67,11 +68,18 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+
 }
 
 @Composable
 fun MenuPrincipal( modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    var islogued:SharedPreferences
+    islogued = context.getSharedPreferences("comun", 0)
+    //por defecto islogued es falso pero se tiene que cambiar a true cuando se inicie sesion
+
+
     Row (
             modifier = Modifier
                .fillMaxSize()){
@@ -79,8 +87,16 @@ fun MenuPrincipal( modifier: Modifier = Modifier) {
                 //tiene que ir un boton invisible debajo de la imagen
 
                 IconButton(onClick = {
-                    val intent = Intent(context, RegistroActivity::class.java)
-                    context.startActivity(intent)
+                    if(islogued.getBoolean("comun",true)){
+                        val intent=Intent(context,MenuDelJuegoAdministradorActivity::class.java)
+                        context.startActivity(intent)
+                    }else{
+                        val intent = Intent(context, RegistroActivity::class.java)
+                        context.startActivity(intent)
+
+
+                    }
+
                 },
                 modifier = Modifier.fillMaxSize()) {
                     Image(

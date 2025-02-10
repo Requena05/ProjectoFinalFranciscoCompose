@@ -1,6 +1,7 @@
 package com.example.projectofinalfranciscocompose
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -85,6 +86,14 @@ class MenuDelJuegoAdministradorActivity : ComponentActivity() {
             }
         }
     }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        var islogued: SharedPreferences=getSharedPreferences("comun", 0)
+        islogued.edit().putBoolean("comun", true).apply()
+        finishAffinity()
+    }
 }
 
 @Composable
@@ -114,11 +123,8 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
                                 Icons.Filled.Add,
                                 contentDescription = " ",
                                 modifier = Modifier.width(20.dp).height(30.dp)
-
                             )
-
                         },
-
                         onClick = {
 
                             scope.launch {
@@ -131,45 +137,12 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
             },
             modifier = Modifier.background(colorResource(R.color.fondo))
         ) {
-            Scaffold(
-                floatingActionButton = {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .wrapContentHeight(Alignment.Top)
-                            .padding(bottom = 690.dp)
-
-                    ) {
-                        ExtendedFloatingActionButton(
-                            text = { Text("Menu") },
-                            icon = {
-                                Icon(
-                                    ImageBitmap.imageResource(R.drawable.menus),
-                                    contentDescription = " ",
-                                    modifier = Modifier.width(20.dp).height(30.dp)
-
-                                )
-                            },
-                            onClick = {
-                                scope.launch {
-                                    if (drawerState.isClosed) {
-                                        drawerState.open()
-                                    } else {
-                                        drawerState.close()
-                                    }
-                                }
-                            },
-                        )
-                    }
-                },
-
-            ) { contentPadding ->
                 Column(
                     Modifier
                         .fillMaxHeight()
                         .fillMaxWidth()
                         .background(colorResource(R.color.fondo))
-                        .padding(contentPadding)
+
                 ) {
                     var isOpening by remember { mutableStateOf(false) }
                     val openAngle by animateFloatAsState(
@@ -180,10 +153,17 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
 
                     Column(
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        CardSlider(cardItem())
+                        Text(
+                            text = "Tienda",
+                            color = Color.Black,
+                            fontSize = 40.sp,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                                .background(Color.White)
+                                .align(Alignment.CenterHorizontally)
+                        )
+//                        CardSlider(cardItem())
                     }
                 }
             }
@@ -196,7 +176,7 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
     }
 
 
-}
+
 @Composable
 fun CardSlider(cards: List<Carta>) {
     val coroutineScope = rememberCoroutineScope()

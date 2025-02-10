@@ -23,6 +23,11 @@
             android:label="@string/title_activity_menu_del_juego_administrador"
             android:theme="@style/Theme.ProjectoFinalFranciscoCompose" />
         <activity
+            android:name=".MenuDelJuegoUsuarioActivity"
+            android:exported="false"
+            android:label="@string/title_activity_menu_del_juego_usuario"
+            android:theme="@style/Theme.ProjectoFinalFranciscoCompose" />
+        <activity
             android:name=".RegistrarUsuarioActivity"
             android:exported="false"
             android:label="@string/title_activity_registrar_usuario"

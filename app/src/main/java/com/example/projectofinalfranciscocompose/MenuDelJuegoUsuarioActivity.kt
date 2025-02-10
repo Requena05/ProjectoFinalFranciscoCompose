@@ -1,5 +1,7 @@
 package com.example.projectofinalfranciscocompose
 
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,6 +28,16 @@ class MenuDelJuegoUsuarioActivity : ComponentActivity() {
                 }
             }
         }
+    }
+    override fun onBackPressed() {
+        super.onBackPressed()
+
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intent)
+        var islogued: SharedPreferences = getSharedPreferences("comun", 0)
+        islogued.edit().putBoolean("comun", true).apply()
+        finishAffinity()
     }
 }
 

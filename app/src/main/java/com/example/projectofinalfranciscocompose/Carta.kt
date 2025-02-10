@@ -1,5 +1,6 @@
 package com.example.projectofinalfranciscocompose
 
+import com.google.firebase.database.FirebaseDatabase
 import java.io.Serializable
 
 data class Carta(
@@ -12,4 +13,12 @@ data class Carta(
     var descripcion:String?="",
     var id_creador:String?="",
 
+
 ): Serializable
+{
+    init {
+        var  db_ref = FirebaseDatabase.getInstance().getReference()
+
+//        id=db_ref.child("Uno").child("Tienda").child("Carta")
+    }
+}
