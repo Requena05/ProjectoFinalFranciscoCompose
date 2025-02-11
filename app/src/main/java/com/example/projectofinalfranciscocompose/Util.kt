@@ -14,8 +14,8 @@ class Util {
             return Cartas.any{ it.id.toString() ==id }
 
         }
-        fun EscribirCarta(db_ref: DatabaseReference, id: String, Cartas: Carta) {
-            db_ref.child("Uno").child("Tienda").child(id).setValue(Cartas)
+        fun EscribirCarta(db_ref: DatabaseReference, id: String, carta: Carta) {
+            db_ref.child("Uno").child("Tienda").child(id).setValue(carta)
         }
 
     }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Layout
+import android.util.Log
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -75,9 +76,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MenuPrincipal( modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    var islogued:SharedPreferences
-    islogued = context.getSharedPreferences("comun", 0)
-    islogued.getBoolean("comun",false)
+    var sharedPreferences:SharedPreferences
+    sharedPreferences = context.getSharedPreferences("comun", 0)
+    var islogued=sharedPreferences.getBoolean("comun",false)
+
+
     //por defecto islogued es falso pero se tiene que cambiar a true cuando se inicie sesion
 
 
@@ -86,9 +89,9 @@ fun MenuPrincipal( modifier: Modifier = Modifier) {
                .fillMaxSize()){
             Column{
                 //tiene que ir un boton invisible debajo de la imagen
-
                 IconButton(onClick = {
-                    if(islogued.getBoolean("comun",true)){
+                    Log.d("islogued",islogued.toString())
+                    if(islogued){
                         val intent=Intent(context,MenuDelJuegoAdministradorActivity::class.java)
                         context.startActivity(intent)
                     }else{

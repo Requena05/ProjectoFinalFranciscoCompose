@@ -3,6 +3,7 @@ package com.example.projectofinalfranciscocompose
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -47,6 +48,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -57,6 +59,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -67,6 +70,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -88,10 +92,13 @@ class MenuDelJuegoAdministradorActivity : ComponentActivity() {
     }
     override fun onBackPressed() {
         super.onBackPressed()
+        val context = applicationContext
+        var sharedPreferences:SharedPreferences
+        sharedPreferences = context.getSharedPreferences("comun", 0)
+        sharedPreferences.edit().putBoolean("comun",true).apply()
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        var islogued: SharedPreferences=getSharedPreferences("comun", 0)
-        islogued.edit().putBoolean("comun", true).apply()
+
         finishAffinity()
     }
 }
@@ -122,14 +129,21 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
                             Icon(
                                 Icons.Filled.Add,
                                 contentDescription = " ",
-                                modifier = Modifier.width(20.dp).height(30.dp)
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(30.dp)
                             )
                         },
                         onClick = {
-
                             scope.launch {
+
                                 val intent=Intent(context,AñadirCartaActivity::class.java)
                                 context.startActivity(intent)
+
+
+
+
+
                             }
                         },
                     )
@@ -159,11 +173,12 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
                             text = "Tienda",
                             color = Color.Black,
                             fontSize = 40.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
                                 .background(Color.White)
                                 .align(Alignment.CenterHorizontally)
                         )
-//                        CardSlider(cardItem())
+                        CardSlider(cardItem())
                     }
                 }
             }
@@ -215,12 +230,22 @@ fun CardSlider(cards: List<Carta>) {
 }
 
 @Composable
-fun cardItem():List<Carta> {
+fun cardItem():MutableList<Carta>{
     //Aqui recibiremos de la base de datos todos los datos de la carta y la crearemos aqui
     var arrayCarta by remember { mutableStateOf(ArrayList<Carta>()) }
-//    var db_ref = FirebaseDatabase.getInstance().reference
+    var db_ref = FirebaseDatabase.getInstance().reference
     val context = LocalContext.current
-//    db_ref.child("Uno").child("Tienda").child("Carta").
+    db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
+        for (i in it.children) {
+            val carta = i.getValue(Carta::class.java)
+            if (carta != null) {
+                arrayCarta.add(carta)
+            }
+        }
+        // Aqui crearemos el Card para cada carta y sera lo que devolveremos
+
+    }
+
 
     Card(
         modifier = Modifier
@@ -229,6 +254,70 @@ fun cardItem():List<Carta> {
             .padding(16.dp)
             .wrapContentWidth(Alignment.CenterHorizontally)
     ){
+        Log.d("array",arrayCarta.toString())
+        //Crearemos con los datos de arraycarta la carta
+        for (i in arrayCarta) {
+            Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                when(i.imagen){
+                    "2130968581" -> {
+                        i.imagen = R.drawable.cartaunoazul.toString()
+                    }
+                    "2130968580"->{
+                        i.imagen = R.drawable.cartaunoamarilla.toString()
+                    }
+                    "2130968579"->{
+                        i.imagen = R.drawable.cartauno.toString()
+
+                    }
+                    "2130968582"->{
+                        i.imagen = R.drawable.cartaunoverde.toString()
+                    }
+                    else -> {
+                        i.imagen = R.drawable.cartaunoamarilla.toString()
+                    }
+
+                }
+                Image(
+                    ImageBitmap.imageResource(i.imagen!!.toInt()), contentDescription = "",
+                    modifier = Modifier
+                        .height(300.dp)
+                        .width(185.dp)
+                        .border(2.dp, Color.Black)
+
+                )
+
+                Text(
+                    text = "${i.numero}\n--",
+                    color = Color.Black,
+                    fontSize = 50.sp,
+                    fontFamily = FontFamily.Default,
+                    modifier = Modifier.padding(7.dp)
+
+                )
+                Text(
+                    text = "${i.numero}",
+                    color = Color.Black,
+                    fontSize = 160.sp,
+                    fontFamily = FontFamily.Default,
+                    modifier = Modifier
+                        //El numero tiene que tener color por dentro
+                        .padding(7.dp).align(Alignment.Center)
+                    ,
+
+                    )
+                Text(
+                    text = "${i.numero} \n--",
+                    color = Color.Black,
+                    fontSize = 50.sp,
+                    fontFamily = FontFamily.Default,
+                    modifier = Modifier.rotate(180f)
+                        .padding(7.dp)
+                        .align(Alignment.BottomEnd)
+                )
+            }
+
+
+        }
 
     }
     return arrayCarta

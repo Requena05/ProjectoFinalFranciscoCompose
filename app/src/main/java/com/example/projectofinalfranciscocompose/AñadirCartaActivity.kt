@@ -54,6 +54,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.projectofinalfranciscocompose.R.drawable.cartauno
+import com.example.projectofinalfranciscocompose.R.drawable.cartaunoamarilla
+import com.example.projectofinalfranciscocompose.R.drawable.cartaunoazul
+import com.example.projectofinalfranciscocompose.R.drawable.cartaunoverde
 import com.example.projectofinalfranciscocompose.Util.Companion.EscribirCarta
 import com.example.projectofinalfranciscocompose.Util.Companion.Existecarta
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
@@ -83,21 +86,42 @@ fun CrearCarta(modifier: Modifier = Modifier) {
         cartacreada= mutableListOf()
 
         //HAZ esta imagen invisible
-        var posiblecartas:MutableList<ImageBitmap>
+        var posiblecartas:MutableList<String>
         posiblecartas= mutableListOf()
-        posiblecartas.add(ImageBitmap.imageResource(cartauno))
-        posiblecartas.add(ImageBitmap.imageResource(R.drawable.cartaunoazul))
-        posiblecartas.add(ImageBitmap.imageResource(R.drawable.cartaunoamarilla))
-        posiblecartas.add(ImageBitmap.imageResource(R.drawable.cartaunoverde))
+        posiblecartas.add("Rojo")
+        posiblecartas.add("Azul")
+        posiblecartas.add("Amarillo")
+        posiblecartas.add("Verde")
         var Numero by remember { mutableStateOf(6) }
         var precio by remember { mutableStateOf("") }
         var descripcion by remember { mutableStateOf("") }
         var currentIndex by remember { mutableStateOf(0) }
         var nombre by remember { mutableStateOf("") }
         var context = LocalContext.current
+        when(posiblecartas[currentIndex]) {
+            "Rojo" -> {
+                posiblecartas[currentIndex] = cartauno.toString()
+            }
+
+            "Azul" -> {
+                posiblecartas[currentIndex] = cartaunoazul.toString()
+            }
+
+            "Amarillo" -> {
+                posiblecartas[currentIndex] = cartaunoamarilla.toString()
+            }
+
+            "Verde" -> {
+                posiblecartas[currentIndex] = cartaunoverde.toString()
+
+            }
+            else -> {
+                posiblecartas[currentIndex] = cartauno.toString()
+            }
+        }
         Box(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 40.dp)) {
             Image(
-                posiblecartas[currentIndex], contentDescription = "",
+                ImageBitmap.imageResource(posiblecartas[currentIndex].toInt()), contentDescription = "",
                 modifier = Modifier
                     .height(300.dp)
                     .width(185.dp)
@@ -219,24 +243,19 @@ fun CrearCarta(modifier: Modifier = Modifier) {
 
         TextButton(modifier = Modifier.align(Alignment.CenterHorizontally),onClick ={
             db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
-                var user:SharedPreferences=context.getSharedPreferences("username", MODE_PRIVATE)
-                user.getString("username",toString())
+                var sharedPreferences:SharedPreferences=context.getSharedPreferences("username", MODE_PRIVATE)
+               var user= sharedPreferences.getString("username","")
+                Log.d("user",user.toString())
                 for (i in it.children) {
                     val usuario = i.getValue(UsuarioLogin::class.java)
-                    Log.d("usuario",user.toString())
                     if (usuario != null && usuario.username==user.toString()) {
-                        cartacreada.add(Carta("", Numero,precio,nombre,descripcion,user.toString(),posiblecartas[currentIndex]))
+                        Log.d("duro",posiblecartas[currentIndex].toString())
+                        var id_carta=db_ref.child("Uno").child("Tienda").push().key.toString()
+                        cartacreada.add(Carta(user.toString(), Numero,precio,nombre,descripcion,id_carta,posiblecartas[currentIndex]))
+                        EscribirCarta(db_ref,id_carta,cartacreada[0])
+                        Toast.makeText(context, "Carta Creada", Toast.LENGTH_SHORT).show()
                     }
-                    if(usuario!=null){
-                        if(Existecarta(cartacreada,"")){
-                            Toast.makeText(context, "Carta Ya Creada", Toast.LENGTH_SHORT).show()
-                        }else{
-                            EscribirCarta(db_ref,"",cartacreada[0])
-                            Toast.makeText(context, "Carta Creada", Toast.LENGTH_SHORT).show()
-                        }
-                        cartacreada.clear()
-
-                    }
+                    cartacreada.clear()
 
                 }
 

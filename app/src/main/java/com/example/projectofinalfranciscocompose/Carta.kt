@@ -12,14 +12,7 @@ data class Carta(
     var Nombre:String?="",
     var descripcion:String?="",
     var id_creador:String?="",
-    var imagen:ImageBitmap?=null
+    var imagen:String?=""
 
 
 ): Serializable
-{
-    init {
-        var  db_ref = FirebaseDatabase.getInstance().getReference()
-
-//        id=db_ref.child("Uno").child("Tienda").child("Carta")
-    }
-}
