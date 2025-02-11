@@ -1,7 +1,11 @@
 package com.example.projectofinalfranciscocompose
 
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,6 +33,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +46,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.vectorResource
@@ -47,7 +54,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.projectofinalfranciscocompose.R.drawable.cartauno
+import com.example.projectofinalfranciscocompose.Util.Companion.EscribirCarta
+import com.example.projectofinalfranciscocompose.Util.Companion.Existecarta
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
+import com.google.firebase.database.FirebaseDatabase
 
 class AñadirCartaActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,21 +75,13 @@ class AñadirCartaActivity : ComponentActivity() {
 
 @Composable
 fun CrearCarta(modifier: Modifier = Modifier) {
+
     Column(modifier = Modifier
         .fillMaxSize()
         .background(colorResource(R.color.fondo))) {
-        Text(
-            text = "Creacion de Carta"
-            , modifier = modifier
-                //tiene que estar al centro
-                .align(Alignment.CenterHorizontally)
-                .background(Color.White)
-                .border(2.dp, Color.Black)
-                .wrapContentWidth()
-                .padding(16.dp)
-                ,
-            fontSize = 22.sp,
-        )
+        var cartacreada:MutableList<Carta>
+        cartacreada= mutableListOf()
+
         //HAZ esta imagen invisible
         var posiblecartas:MutableList<ImageBitmap>
         posiblecartas= mutableListOf()
@@ -88,15 +90,21 @@ fun CrearCarta(modifier: Modifier = Modifier) {
         posiblecartas.add(ImageBitmap.imageResource(R.drawable.cartaunoamarilla))
         posiblecartas.add(ImageBitmap.imageResource(R.drawable.cartaunoverde))
         var Numero by remember { mutableStateOf(6) }
-            var currentIndex by remember { mutableStateOf(0) }
-        Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+        var precio by remember { mutableStateOf("") }
+        var descripcion by remember { mutableStateOf("") }
+        var currentIndex by remember { mutableStateOf(0) }
+        var nombre by remember { mutableStateOf("") }
+        var context = LocalContext.current
+        Box(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 40.dp)) {
             Image(
                 posiblecartas[currentIndex], contentDescription = "",
                 modifier = Modifier
                     .height(300.dp)
                     .width(185.dp)
                     .border(2.dp, Color.Black)
+
             )
+
             Text(
                 text = "$Numero\n--",
                 color = Color.Black,
@@ -187,7 +195,71 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                     }
                 }
 
+                TextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre De la Carta")},
+                    modifier=Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                )
+
+                TextField(
+                    value = descripcion,
+                    onValueChange = { descripcion = it },
+                    label = { Text("Descripcion")},
+                   modifier=Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                )
+                TextField(
+                    value = "$precio",
+                    onValueChange = { precio = it.replace(",",".")},
+                    label = { Text("Precio €")},
+                    modifier=Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                )
             }
+            db_ref = FirebaseDatabase.getInstance().getReference()
+
+        TextButton(modifier = Modifier.align(Alignment.CenterHorizontally),onClick ={
+            db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
+                var user:SharedPreferences=context.getSharedPreferences("username", MODE_PRIVATE)
+                user.getString("username",toString())
+                for (i in it.children) {
+                    val usuario = i.getValue(UsuarioLogin::class.java)
+                    Log.d("usuario",user.toString())
+                    if (usuario != null && usuario.username==user.toString()) {
+                        cartacreada.add(Carta("", Numero,precio,nombre,descripcion,user.toString(),posiblecartas[currentIndex]))
+                    }
+                    if(usuario!=null){
+                        if(Existecarta(cartacreada,"")){
+                            Toast.makeText(context, "Carta Ya Creada", Toast.LENGTH_SHORT).show()
+                        }else{
+                            EscribirCarta(db_ref,"",cartacreada[0])
+                            Toast.makeText(context, "Carta Creada", Toast.LENGTH_SHORT).show()
+                        }
+                        cartacreada.clear()
+
+                    }
+
+                }
+
+
+            }
+
+
+
+
+        }) {
+
+            Text(
+                text = "Crear Carta"
+                , modifier = modifier
+                    //tiene que estar al centro
+                    .background(Color.White)
+                    .border(2.dp, Color.Black)
+                    .wrapContentWidth()
+                    .padding(16.dp)
+                ,
+                fontSize = 22.sp,
+            )}
+
         }
 
 

@@ -77,6 +77,7 @@ fun MenuPrincipal( modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var islogued:SharedPreferences
     islogued = context.getSharedPreferences("comun", 0)
+    islogued.getBoolean("comun",false)
     //por defecto islogued es falso pero se tiene que cambiar a true cuando se inicie sesion
 
 

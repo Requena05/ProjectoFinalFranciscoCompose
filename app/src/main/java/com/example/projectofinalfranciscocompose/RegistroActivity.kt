@@ -1,6 +1,7 @@
 package com.example.projectofinalfranciscocompose
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
@@ -41,6 +42,7 @@ import com.example.projectofinalfranciscocompose.Util.Companion.existeUsuario
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import androidx.core.content.edit
 
 class RegistroActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -163,6 +165,8 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                                         }else if (usuario.tipo==2 &&  usuario.username.toString().equals(text_username) && usuario.password.toString().equals(text_password) && usuario.email.toString().equals(text_email)){
                                         val intent = Intent(context, MenuDelJuegoAdministradorActivity::class.java)
                                         //que no se vea la animación de transición
+                                        var id_usuario: SharedPreferences=context.getSharedPreferences("id_usuario",0)
+                                        id_usuario.edit().putString("username", text_username).apply()
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                                         context.startActivity(intent)
                                     }else{
