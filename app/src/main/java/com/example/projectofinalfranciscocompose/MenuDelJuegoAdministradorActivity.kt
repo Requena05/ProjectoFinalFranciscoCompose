@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -44,6 +45,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -52,6 +54,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -158,11 +161,6 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
                         .background(colorResource(R.color.fondo))
 
                 ) {
-                    var isOpening by remember { mutableStateOf(false) }
-                    val openAngle by animateFloatAsState(
-                        targetValue = if (isOpening) 180f else 0f,
-                        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
-                    )
                     Spacer(modifier = Modifier.weight(1f))
 
                     Column(
@@ -174,11 +172,13 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
                             color = Color.Black,
                             fontSize = 40.sp,
                             modifier = Modifier
-                                .padding(bottom = 16.dp)
                                 .background(Color.White)
                                 .align(Alignment.CenterHorizontally)
                         )
-                        CardSlider(cardItem())
+                        Row {
+                            CardSlider()
+                        }
+
                     }
                 }
             }
@@ -193,135 +193,102 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
 
 
 @Composable
-fun CardSlider(cards: List<Carta>) {
-    val coroutineScope = rememberCoroutineScope()
-    var offsetX by remember { mutableStateOf(0f) }
-    val animatedOffsetX by animateFloatAsState(
-        targetValue = offsetX,
-        animationSpec = spring(stiffness = Spring.StiffnessLow)
-    )
+    fun CardSlider(modifier: Modifier = Modifier) {
+        var arrayCarta by remember { mutableStateOf<List<Carta>>(emptyList()) }
+        var db_ref = FirebaseDatabase.getInstance().reference
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures { _, dragAmount ->
-                    coroutineScope.launch {
-                        offsetX += dragAmount
-                        // Limit the offset to prevent scrolling too far
-                        offsetX = offsetX.coerceIn(
-                            -size.width.toFloat() * (cards.size - 1),
-                            0f
+        //LaunchedEffect will fetch the data when the component is displayed
+        LaunchedEffect(key1 = true) {
+            db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
+                val tempArray = mutableListOf<Carta>()
+                for (i in it.children) {
+                    val carta = i.getValue(Carta::class.java)
+                    if (carta != null) {
+                        tempArray.add(carta)
+                    }
+                    //si en tempArray existen valores repetidos se eliminan
+                    tempArray.distinct()
+                }
+                arrayCarta = tempArray
+                Log.d("array", arrayCarta.toString())
+                Log.d("arraysiez", arrayCarta.size.toString())
+            }
+        }
+
+        LazyRow(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 50.dp)
+                .height(600.dp),
+        ) {
+            Log.d("arra2ysize", arrayCarta.size.toString())
+            arrayCarta.forEach { card ->
+                Log.d("card", card.toString())
+                items(1){ index->
+                Card(
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(345.dp)
+                        .padding(8.dp)
+                ) {
+                    Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                        var imagenResourse = when (card.imagen) {
+                            "2130968581" -> R.drawable.cartaunoazul
+                            "2130968580" -> R.drawable.cartaunoamarilla
+                            "2130968579" -> R.drawable.cartauno
+                            "2130968582" -> R.drawable.cartaunoverde
+                            else -> R.drawable.cartaunoamarilla
+                        }
+                        IconButton(modifier = Modifier.align(Alignment.TopEnd).fillParentMaxSize(), onClick = {
+                            Log.i("He cliclao","sss")
+                        }) {
+                            Image(
+                            bitmap = ImageBitmap.imageResource(imagenResourse),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .fillParentMaxSize().padding(90.dp)
+
+                                .border(2.dp, Color.Black)
+                        ) }
+                        
+                        Text(
+                            text = "${card.numero}\n--",
+                            color = Color.Black,
+                            fontSize = 50.sp,
+                            fontFamily = FontFamily.Default,
+                            modifier = Modifier.padding(7.dp)
+                        )
+                        Text(
+                            text = "${card.numero}",
+                            color = Color.Black,
+                            fontSize = 160.sp,
+                            fontFamily = FontFamily.Default,
+                            modifier = Modifier
+                                .padding(7.dp)
+                                .align(Alignment.Center),
+                        )
+                        Text(
+                            text = "${card.numero} \n--",
+                            color = Color.Black,
+                            fontSize = 50.sp,
+                            fontFamily = FontFamily.Default,
+                            modifier = Modifier
+                                .rotate(180f)
+                                .padding(7.dp)
+                                .align(Alignment.BottomEnd)
                         )
                     }
                 }
             }
-    ) {
-        Row(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .offset(x = animatedOffsetX.dp)
-        ) {
-            cards.forEach { card ->
-                cardItem()
             }
         }
     }
-}
-
-@Composable
-fun cardItem():MutableList<Carta>{
-    //Aqui recibiremos de la base de datos todos los datos de la carta y la crearemos aqui
-    var arrayCarta by remember { mutableStateOf(ArrayList<Carta>()) }
-    var db_ref = FirebaseDatabase.getInstance().reference
-    val context = LocalContext.current
-    db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
-        for (i in it.children) {
-            val carta = i.getValue(Carta::class.java)
-            if (carta != null) {
-                arrayCarta.add(carta)
-            }
-        }
-        // Aqui crearemos el Card para cada carta y sera lo que devolveremos
-
-    }
 
 
-    Card(
-        modifier = Modifier
-            .width(150.dp)
-            .height(200.dp)
-            .padding(16.dp)
-            .wrapContentWidth(Alignment.CenterHorizontally)
-    ){
-        Log.d("array",arrayCarta.toString())
-        //Crearemos con los datos de arraycarta la carta
-        for (i in arrayCarta) {
-            Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                when(i.imagen){
-                    "2130968581" -> {
-                        i.imagen = R.drawable.cartaunoazul.toString()
-                    }
-                    "2130968580"->{
-                        i.imagen = R.drawable.cartaunoamarilla.toString()
-                    }
-                    "2130968579"->{
-                        i.imagen = R.drawable.cartauno.toString()
-
-                    }
-                    "2130968582"->{
-                        i.imagen = R.drawable.cartaunoverde.toString()
-                    }
-                    else -> {
-                        i.imagen = R.drawable.cartaunoamarilla.toString()
-                    }
-
-                }
-                Image(
-                    ImageBitmap.imageResource(i.imagen!!.toInt()), contentDescription = "",
-                    modifier = Modifier
-                        .height(300.dp)
-                        .width(185.dp)
-                        .border(2.dp, Color.Black)
-
-                )
-
-                Text(
-                    text = "${i.numero}\n--",
-                    color = Color.Black,
-                    fontSize = 50.sp,
-                    fontFamily = FontFamily.Default,
-                    modifier = Modifier.padding(7.dp)
-
-                )
-                Text(
-                    text = "${i.numero}",
-                    color = Color.Black,
-                    fontSize = 160.sp,
-                    fontFamily = FontFamily.Default,
-                    modifier = Modifier
-                        //El numero tiene que tener color por dentro
-                        .padding(7.dp).align(Alignment.Center)
-                    ,
-
-                    )
-                Text(
-                    text = "${i.numero} \n--",
-                    color = Color.Black,
-                    fontSize = 50.sp,
-                    fontFamily = FontFamily.Default,
-                    modifier = Modifier.rotate(180f)
-                        .padding(7.dp)
-                        .align(Alignment.BottomEnd)
-                )
-            }
 
 
-        }
 
-    }
-    return arrayCarta
-}
+
 
 
 
@@ -333,3 +300,4 @@ fun GreetingPreview4() {
         MenuDelAdministrador()
     }
 }
+
