@@ -172,6 +172,24 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                             }
                         },
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ExtendedFloatingActionButton(
+                        text = { Text("Ver pedidos") },
+                        icon = {
+                            Icon(
+                                Icons.Filled.Add,
+                                contentDescription = " ",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(30.dp)
+                            )
+                        },
+                        onClick = {
+                            scope.launch {
+                                TODO()
+                            }
+                        },
+                    )
                 }
             },
             modifier = Modifier.background(colorResource(R.color.fondo))
@@ -200,7 +218,7 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                             .wrapContentWidth()
                             .wrapContentHeight()
                     )
-                    IconButton(modifier = Modifier.wrapContentSize(), onClick = {
+                    IconButton(modifier = Modifier.size(70.dp), onClick = {
                         scope.launch {
                             if (drawerState.isClosed) {
                                 drawerState.open()
@@ -209,7 +227,9 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                             }
                         }
                     }) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        Icon(Icons.Filled.Menu, contentDescription = "Menu",modifier = Modifier
+                            .size(70.dp)
+                            .padding(2.dp))
                     }
                 }
 
