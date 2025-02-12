@@ -36,6 +36,8 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
@@ -78,10 +80,12 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.finishAffinity
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 import org.checkerframework.checker.units.qual.A
+import androidx.core.content.edit
 
 class MenuDelJuegoAdministradorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,88 +111,114 @@ class MenuDelJuegoAdministradorActivity : ComponentActivity() {
 }
 
 @Composable
-fun MenuDelAdministrador( modifier: Modifier = Modifier) {
+fun MenuDelAdministrador(modifier: Modifier = Modifier) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(R.color.fondo))
-    ) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    modifier = Modifier
-                        .background(colorResource(R.color.gray))
-                        .padding(16.dp)
-                        ,
-                    drawerContainerColor = colorResource(R.color.black)
-                ) {
-                    ExtendedFloatingActionButton(
-                        text = { Text("Añadir Carta") },
-                        icon = {
-                            Icon(
-                                Icons.Filled.Add,
-                                contentDescription = " ",
-                                modifier = Modifier
-                                    .width(20.dp)
-                                    .height(30.dp)
-                            )
-                        },
-                        onClick = {
-                            scope.launch {
 
-                                val intent=Intent(context,AñadirCartaActivity::class.java)
-                                context.startActivity(intent)
-
-
-
-
-
-                            }
-                        },
-                    )
-                }
-            },
-            modifier = Modifier.background(colorResource(R.color.fondo))
-        ) {
-                Column(
-                    Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth()
-                        .background(colorResource(R.color.fondo))
-
-                ) {
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Tienda",
-                            color = Color.Black,
-                            fontSize = 40.sp,
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier
+                    .background(colorResource(R.color.gray))
+                    .padding(16.dp),
+                drawerContainerColor = colorResource(R.color.black)
+            ) {
+                ExtendedFloatingActionButton(
+                    text = { Text("Añadir Carta") },
+                    icon = {
+                        Icon(
+                            Icons.Filled.Add,
+                            contentDescription = " ",
                             modifier = Modifier
-                                .background(Color.White)
-                                .align(Alignment.CenterHorizontally)
+                                .width(20.dp)
+                                .height(30.dp)
                         )
-                        Row {
-                            CardSlider()
+                    },
+                    onClick = {
+                        scope.launch {
+                            val intent = Intent(context, AñadirCartaActivity::class.java)
+                            context.startActivity(intent)
                         }
+                    },
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                ExtendedFloatingActionButton(
+                    text = { Text("Cerrar Sesion") },
+                    icon = {
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = " ",
+                            modifier = Modifier
+                                .width(20.dp)
+                                .height(30.dp)
+                        )
+                    },
+                    onClick = {
+                        scope.launch {
+                            val sharedPreferences = context.getSharedPreferences("comun", 0)
+                            sharedPreferences.edit { putBoolean("comun", false) }
+                            val intent = Intent(context, MainActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                    },
+                )
+            }
+        },
+        modifier = Modifier.background(colorResource(R.color.fondo))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorResource(R.color.fondo))
+        ) {
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Tienda",
+                    color = Color.Black,
+                    fontSize = 40.sp,
+                    modifier = Modifier
+                        .background(Color.White)
+                        .padding(16.dp)
+                        .wrapContentWidth()
+                        .wrapContentHeight()
+                )
+                IconButton(onClick = {
+                    scope.launch {
+                        if (drawerState.isClosed) {
+                            drawerState.open()
+                        } else {
+                            drawerState.close()
+                        }
                     }
+                }) {
+                    Icon(Icons.Filled.Menu, contentDescription = "Menu")
                 }
             }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                Row {
+                    CardSlider()
+                }
+
+            }
         }
-        //En esta parte estaran las cartas creadas por los adminitradores ,esas cartas no estaran en la
-        //tienda del usuario ,el administrador tendrá que pinchar en las cartas y ver sus detalles para
-        //añadirla a la tienda del usuario
-
-
     }
+}
 
 
 
@@ -239,14 +269,17 @@ fun MenuDelAdministrador( modifier: Modifier = Modifier) {
                             "2130968582" -> R.drawable.cartaunoverde
                             else -> R.drawable.cartaunoamarilla
                         }
-                        IconButton(modifier = Modifier.align(Alignment.TopEnd).fillParentMaxSize(), onClick = {
+                        IconButton(modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .fillParentMaxSize(), onClick = {
                             Log.i("He cliclao","sss")
                         }) {
                             Image(
                             bitmap = ImageBitmap.imageResource(imagenResourse),
                             contentDescription = "",
                             modifier = Modifier
-                                .fillParentMaxSize().padding(90.dp)
+                                .fillParentMaxSize()
+                                .padding(90.dp)
 
                                 .border(2.dp, Color.Black)
                         ) }
