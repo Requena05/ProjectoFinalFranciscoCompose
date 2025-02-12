@@ -42,6 +42,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -166,12 +167,12 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                 )
             }
         },
-        modifier = Modifier.background(colorResource(R.color.fondo))
+        modifier = Modifier.background(colorResource(R.color.fondo2))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource(R.color.fondo))
+                .background(colorResource(R.color.fondo2))
         ) {
 
             Row(
@@ -257,9 +258,11 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                 items(1){ index->
                 Card(
                     modifier = Modifier
-                        .width(200.dp)
+                        .width(202.dp)
                         .height(345.dp)
                         .padding(8.dp)
+                    ,
+                        elevation = CardDefaults.cardElevation(10.dp)
                 ) {
                     Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                         var imagenResourse = when (card.imagen) {
