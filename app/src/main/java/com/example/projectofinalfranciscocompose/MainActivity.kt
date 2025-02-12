@@ -78,8 +78,8 @@ fun MenuPrincipal( modifier: Modifier = Modifier) {
     val context = LocalContext.current
     var sharedPreferences:SharedPreferences
     sharedPreferences = context.getSharedPreferences("comun", 0)
-    var islogued=sharedPreferences.getBoolean("comun",false)
-
+    var islogued=sharedPreferences.getBoolean("islogued",false)
+    var tipo=sharedPreferences.getInt("tipo",0)
 
     //por defecto islogued es falso pero se tiene que cambiar a true cuando se inicie sesion
 
@@ -90,11 +90,15 @@ fun MenuPrincipal( modifier: Modifier = Modifier) {
             Column{
                 //tiene que ir un boton invisible debajo de la imagen
                 IconButton(onClick = {
-                    Log.d("islogued",islogued.toString())
-                    if(islogued){
-                        val intent=Intent(context,MenuDelJuegoAdministradorActivity::class.java)
+                    Log.d("islogued", islogued.toString())
+                    if (islogued && tipo == 2) {
+                        val intent = Intent(context, MenuDelJuegoAdministradorActivity::class.java)
                         context.startActivity(intent)
-                    }else{
+                    }else if (islogued &&tipo == 1) {
+                        val intent = Intent(context, MenuDelJuegoUsuarioActivity::class.java)
+                        context.startActivity(intent)
+
+                }else{
                         val intent = Intent(context, RegistroActivity::class.java)
                         context.startActivity(intent)
 

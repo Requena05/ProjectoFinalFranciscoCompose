@@ -1,5 +1,6 @@
 package com.example.projectofinalfranciscocompose
 
+import android.util.Log
 import com.google.firebase.database.DatabaseReference
 
 class Util {
@@ -16,6 +17,15 @@ class Util {
         }
         fun EscribirCarta(db_ref: DatabaseReference, id: String, carta: Carta) {
             db_ref.child("Uno").child("Tienda").child(id).setValue(carta)
+        }
+        fun borrarCarta(db_ref: DatabaseReference, id: String) {
+            db_ref.child("Uno").child("Tienda").child(id).removeValue()
+        }
+        fun PublicarCarta(db_ref: DatabaseReference, id: String, carta: Carta) {
+            if (carta.publicada==true) {
+                db_ref.child("Uno").child("Publicacion").child(id).setValue(carta)
+            }
+
         }
 
     }

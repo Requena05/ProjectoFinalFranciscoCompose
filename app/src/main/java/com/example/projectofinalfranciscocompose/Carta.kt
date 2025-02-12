@@ -12,7 +12,8 @@ data class Carta(
     var Nombre:String?="",
     var descripcion:String?="",
     var id_creador:String?="",
-    var imagen:String?=""
+    var imagen:String?="",
+    var publicada:Boolean?=false
 
 
 ): Serializable

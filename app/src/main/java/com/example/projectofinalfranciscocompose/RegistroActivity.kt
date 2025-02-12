@@ -38,6 +38,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.finishAffinity
 import com.example.projectofinalfranciscocompose.Util.Companion.existeUsuario
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
 import com.google.firebase.database.DatabaseReference
@@ -146,6 +147,7 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                                usuario.email.toString().equals(text_email) ) {
                                 Usuarios.add(usuario)
                             }
+                            //una sharedPreferences para guardar el tipo de usuario
 
                         }
                         Log.d("Usuarios", Usuarios.toString())
@@ -157,17 +159,27 @@ fun Registodelusuario(modifier: Modifier = Modifier) {
                                 val usuario=Usuarios.find { it.username == text_username }
                                 Log.d("Usuario", usuario.toString())
                                 if (usuario != null) {
+                                    var tipo_usuario: SharedPreferences=context.getSharedPreferences("tipo",0)
                                     if(usuario.tipo ==1 && usuario.username.toString().equals(text_username) && usuario.password.toString().equals(text_password) && usuario.email.toString().equals(text_email) ){
+                                        tipo_usuario.edit().putInt("tipo",1).apply()
                                         val intent = Intent(context, MenuDelJuegoUsuarioActivity::class.java)
                                         context.startActivity(intent)
+                                        finishAffinity(context as ComponentActivity)
+
+
 
                                         }else if (usuario.tipo==2 &&  usuario.username.toString().equals(text_username) && usuario.password.toString().equals(text_password) && usuario.email.toString().equals(text_email)){
+
+
                                         val intent = Intent(context, MenuDelJuegoAdministradorActivity::class.java)
+                                        tipo_usuario.edit().putInt("tipo",2).apply()
                                         //que no se vea la animación de transición
                                         var id_usuario: SharedPreferences=context.getSharedPreferences("username",0)
                                         id_usuario.edit().putString("username", text_username).apply()
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                                         context.startActivity(intent)
+                                        finishAffinity(context as ComponentActivity)
+
                                     }else{
                                         Toast.makeText(context,"Username, Email o Contraseña incorrectos", Toast.LENGTH_SHORT).show()
                                     }

@@ -81,7 +81,7 @@ fun CrearCarta(modifier: Modifier = Modifier) {
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(colorResource(R.color.fondo))) {
+        .background(colorResource(R.color.fondo2))) {
         var cartacreada:MutableList<Carta>
         cartacreada= mutableListOf()
 
@@ -224,6 +224,7 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                     onValueChange = { nombre = it },
                     label = { Text("Nombre De la Carta")},
                     modifier=Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                        .border(2.dp, Color.Black)
                 )
 
                 TextField(
@@ -231,12 +232,14 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                     onValueChange = { descripcion = it },
                     label = { Text("Descripcion")},
                    modifier=Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                       .border(2.dp, Color.Black)
                 )
                 TextField(
                     value = "$precio",
                     onValueChange = { precio = it.replace(",",".")},
                     label = { Text("Precio €")},
                     modifier=Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                        .border(2.dp, Color.Black)
                 )
             }
             db_ref = FirebaseDatabase.getInstance().getReference()
