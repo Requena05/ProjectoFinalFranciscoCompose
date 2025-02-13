@@ -2,6 +2,7 @@ package com.example.projectofinalfranciscocompose
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.drawable.shapes.Shape
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -51,6 +53,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
@@ -73,6 +76,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -132,7 +136,8 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         .padding(16.dp),
                     drawerContainerColor = colorResource(R.color.black)
                 ) {
-                    ExtendedFloatingActionButton(
+                    ExtendedFloatingActionButton(modifier=Modifier.width(170.dp),
+
                         text = { Text("Añadir Carta") },
                         icon = {
                             Icon(
@@ -151,7 +156,8 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    ExtendedFloatingActionButton(
+                    ExtendedFloatingActionButton(modifier=Modifier.width(170.dp),
+
                         text = { Text("Cerrar Sesion") },
                         icon = {
                             Icon(
@@ -173,23 +179,39 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    ExtendedFloatingActionButton(
-                        text = { Text("Ver pedidos") },
-                        icon = {
-                            Icon(
-                                Icons.Filled.Add,
-                                contentDescription = " ",
-                                modifier = Modifier
-                                    .width(20.dp)
-                                    .height(30.dp)
-                            )
-                        },
-                        onClick = {
-                            scope.launch {
-                                TODO()
-                            }
-                        },
-                    )
+                    Box {
+                        ExtendedFloatingActionButton(modifier=Modifier.width(170.dp),
+
+                            text = { Text("Ver pedidos") },
+                            icon = {
+                                Icon(
+                                    Icons.Filled.Add,
+                                    contentDescription = " ",
+                                    modifier = Modifier
+                                        .width(20.dp)
+                                        .height(30.dp)
+                                )
+                            },
+                            onClick = {
+                                scope.launch {
+                                    Log.d("<", "1")
+                                }
+                            },
+                        )
+                        Text(text = "0",
+                            modifier=Modifier
+                                .align(Alignment.TopEnd)
+                                .size(30.dp)
+                                .background(colorResource(R.color.fondo3), shape = RoundedCornerShape(100))
+                                .border(2.dp, Color.Black, shape = RoundedCornerShape(100))
+                                .padding(3.dp)
+
+                        ,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            color = Color.Black,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             },
             modifier = Modifier.background(colorResource(R.color.fondo))
@@ -228,7 +250,7 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         }
                     }) {
                         Icon(Icons.Filled.Menu, contentDescription = "Menu",modifier = Modifier
-                            .size(70.dp)
+                            .size(40.dp)
                             .padding(2.dp))
                     }
                 }
@@ -452,6 +474,22 @@ fun AnimatedCard(card: Carta) {
                                     )
 
                                 }
+                                var context = LocalContext.current
+                                Button(modifier = Modifier.wrapContentWidth(), onClick = {
+                                    db_ref = FirebaseDatabase.getInstance().getReference()
+                                    val intent = Intent(context, AñadirCartaActivity::class.java)
+                                    //crea una sp para pasar toda la carta para que se pueda editar
+                                    val sharedPreferences = context.getSharedPreferences("comun", 0)
+                                    sharedPreferences.edit { putString("carta", card.id_creador ) }
+                                    context.startActivity(intent)
+
+                                }) {
+                                    Text(
+                                        "Editar",
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1
+                                    )
+                                }
 
                             }
                     }
@@ -483,6 +521,8 @@ fun AnimatedCard(card: Carta) {
                             .rotate(180f)
                             .align(Alignment.BottomEnd)
                     )
+
+
                 }
             }
         }

@@ -196,13 +196,12 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                         color = Color.Black,
                         fontSize = 40.sp,
                         modifier = Modifier
-                            .background(Color.White)
                             .padding(16.dp)
                             .wrapContentWidth()
                             .wrapContentHeight()
                     )
                     IconButton(modifier = Modifier
-                        .size(70.dp)
+                        .size(40.dp)
                         .padding(2.dp), onClick = {
                     }){
                         //Este icono es del monedero
@@ -211,14 +210,14 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                             contentDescription = "Cartera",)
                     }
                     IconButton(modifier = Modifier
-                        .size(70.dp)
+                        .size(40.dp)
                         .padding(2.dp), onClick = {
                         // TODO:
                     }){
                         Image(ImageBitmap.imageResource(R.drawable.mazo),contentDescription = "mazo")
                     }
                     IconButton(modifier = Modifier
-                        .size(70.dp)
+                        .size(40.dp)
                         .padding(2.dp), onClick = {
                         scope.launch {
                             if (drawerState.isClosed) {
@@ -231,7 +230,7 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                     }) {
 
                         Icon(Icons.Filled.Menu, contentDescription = "Menu",modifier = Modifier
-                            .size(70.dp)
+                            .size(40.dp)
                             .padding(2.dp))
                     }
                 }
