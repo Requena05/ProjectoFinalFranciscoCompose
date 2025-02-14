@@ -70,14 +70,299 @@ class AñadirCartaActivity : ComponentActivity() {
         setContent {
             ProjectoFinalFranciscoComposeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    
-                    CrearCarta(modifier = Modifier.padding(innerPadding))
+                    var context = LocalContext.current
+                    var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
+                    var editar = sp.getString("carta", " ")
+                    if (editar == " "){
+                        CrearCarta(modifier = Modifier.padding(innerPadding))
+                    }else{
+                        EditarCarta(modifier = Modifier.padding(innerPadding))
+                    }
                 }
             }
         }
     }
 }
+@Composable
+fun EditarCarta(modifier: Modifier = Modifier) {
+    var context = LocalContext.current
+    var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
+    var editar = sp.getString("carta", " ")
+    Log.d("editar", editar.toString())
+    db_ref = FirebaseDatabase.getInstance().getReference()
 
+    var numero by remember { mutableStateOf(0) }
+    var precio by remember { mutableStateOf("") }
+    var descripcion by remember { mutableStateOf("") }
+    var currentIndex by remember { mutableStateOf(0) }
+    var nombre by remember { mutableStateOf("") }
+
+
+
+    LaunchedEffect(key1 = editar) {
+        db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
+            //con el id de la carta rellenamos los campos
+            for (i in it.children) {
+                val carta = i.getValue(Carta::class.java)
+                if (carta!!.id_creador == editar) {
+                    numero = carta!!.numero.toString().toInt()
+                    precio = carta.Precio.toString()
+                    descripcion = carta.descripcion.toString()
+                    nombre = carta.Nombre.toString()
+
+                }
+
+
+            }
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(R.color.fondo2))
+    ) {
+        var cartacreada: MutableList<Carta>
+        cartacreada = mutableListOf()
+
+
+        var posiblecartas: MutableList<String>
+        posiblecartas = mutableListOf()
+        posiblecartas.add("Rojo")
+        posiblecartas.add("Azul")
+        posiblecartas.add("Amarillo")
+        posiblecartas.add("Verde")
+        when (posiblecartas[currentIndex]) {
+            "Rojo" -> {
+                posiblecartas[currentIndex] = cartauno.toString()
+            }
+
+            "Azul" -> {
+                posiblecartas[currentIndex] = cartaunoazul.toString()
+            }
+
+            "Amarillo" -> {
+                posiblecartas[currentIndex] = cartaunoamarilla.toString()
+            }
+
+            "Verde" -> {
+                posiblecartas[currentIndex] = cartaunoverde.toString()
+
+            }
+
+            else -> {
+                posiblecartas[currentIndex] = cartauno.toString()
+            }
+        }
+
+
+
+        Box(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 40.dp)) {
+            Image(
+                ImageBitmap.imageResource(posiblecartas[currentIndex].toInt()),
+                contentDescription = "",
+                modifier = Modifier
+                    .height(300.dp)
+                    .width(185.dp)
+                    .border(2.dp, Color.Black)
+
+            )
+
+            Text(
+                text = "$numero\n--",
+                color = Color.Black,
+                fontSize = 50.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+                modifier = Modifier.padding(7.dp)
+
+            )
+            Text(
+                text = "$numero",
+                color = Color.Black,
+                fontSize = 160.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+                modifier = Modifier
+                    //El numero tiene que tener color por dentro
+                    .padding(7.dp).align(Alignment.Center),
+
+                )
+            Text(
+                text = "$numero \n--",
+                color = Color.Black,
+                fontSize = 50.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+                modifier = Modifier.rotate(180f)
+                    .padding(7.dp)
+                    .align(Alignment.BottomEnd)
+
+            )
+        }
+        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                if (posiblecartas.isEmpty()) {
+                    Text("No items to display")
+
+                } else {
+                    fun moveBackward() {
+                        currentIndex =
+                            if (currentIndex > 0) currentIndex - 1 else posiblecartas.size - 1
+                    }
+
+                    fun moveForward() {
+                        currentIndex =
+                            if (currentIndex < posiblecartas.size - 1) currentIndex + 1 else 0
+                    }
+                    Button(
+                        onClick = { moveBackward() },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Previous"
+                        )
+                    }
+
+                    Button(
+                        onClick = { moveForward() },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Next"
+                        )
+                    }
+
+                }
+            }
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Button(modifier = Modifier.padding(end = 8.dp).width(70.dp), onClick = {
+                    numero++
+                    if (numero == 10) {
+                        numero = 0
+                    }
+
+                }) {
+                    Text("+", modifier = Modifier.align(Alignment.CenterVertically))
+                }
+                Button(modifier = Modifier.padding(start = 8.dp).width(70.dp), onClick = {
+                    numero--
+                    if (numero == -1) {
+                        numero = 9
+                    }
+                }) {
+                    Text("-", modifier = Modifier.align(Alignment.CenterVertically))
+                }
+            }
+
+            TextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = { Text("Nombre De la Carta") },
+                modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                    .border(2.dp, Color.Black)
+            )
+
+            TextField(
+                value = descripcion,
+                onValueChange = { descripcion = it },
+                label = { Text("Descripcion") },
+                modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                    .border(2.dp, Color.Black)
+            )
+            TextField(
+                value = precio,
+                onValueChange = { precio = it.replace(",", ".") },
+                label = { Text("Precio €") },
+                modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                    .border(2.dp, Color.Black)
+            )
+        }
+        TextButton(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
+            //comprobamos que existan valores en los campos
+            db_ref = FirebaseDatabase.getInstance().getReference()
+            if (nombre.isEmpty() || descripcion.isEmpty() || precio.isEmpty()) {
+                Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT)
+                    .show()
+                return@TextButton
+            } else if (nombre.length > 20) {
+                Toast.makeText(
+                    context,
+                    "El nombre no puede tener mas de 20 caracteres",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@TextButton
+            } else if (descripcion.length > 50) {
+                Toast.makeText(
+                    context,
+                    "La descripcion no puede tener mas de 50 caracteres",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@TextButton
+            } else if (precio.toDoubleOrNull() == null) {
+                Toast.makeText(
+                    context,
+                    "El precio tiene que ser un numero",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+                return@TextButton
+            } else {
+
+                db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
+                    var sharedPreferences: SharedPreferences =
+                        context.getSharedPreferences("username", MODE_PRIVATE)
+                    var user = sharedPreferences.getString("username", "")
+                    Log.d("user", user.toString())
+                    for (i in it.children) {
+                        val usuario = i.getValue(UsuarioLogin::class.java)
+                        if (usuario != null && usuario.username == user.toString()) {
+                            Log.d("duro", posiblecartas[currentIndex].toString())
+                            var id_carta =
+                                db_ref.child("Uno").child("Tienda").child(editar!!).key.toString()
+                            cartacreada.add(
+                                Carta(
+                                    user.toString(),
+                                    numero,
+                                    precio,
+                                    nombre,
+                                    descripcion,
+                                    id_carta,
+                                    posiblecartas[currentIndex].toString()
+                                )
+                            )
+
+
+
+                            EditarCarta(db_ref, id_carta, cartacreada[0])
+                            Toast.makeText(context, "Carta Editada", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                        cartacreada.clear()
+
+                    }
+                }
+
+            }
+
+
+        }) {
+
+            Text(
+                text = "Editar Carta",
+                modifier = modifier
+                    //tiene que estar al centro
+                    .background(Color.White)
+                    .border(2.dp, Color.Black)
+                    .wrapContentWidth()
+                    .padding(16.dp),
+                fontSize = 22.sp,
+            )
+        }
+    }
+
+}
 @Composable
 fun CrearCarta(modifier: Modifier = Modifier) {
 
@@ -100,350 +385,245 @@ fun CrearCarta(modifier: Modifier = Modifier) {
         var context = LocalContext.current
 
 
-        var numero by remember { mutableStateOf(6) }
+        var numero by remember { mutableStateOf(0) }
         var precio by remember { mutableStateOf("") }
         var descripcion by remember { mutableStateOf("") }
         var currentIndex by remember { mutableStateOf(0) }
         var nombre by remember { mutableStateOf("") }
-        var crearoeditar=false
         var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
         var editar = sp.getString("carta", " ")
         Log.d("editar", editar.toString())
-        if (editar.isNullOrEmpty()) {
-            Log.d("editar", "vacio")
+        db_ref = FirebaseDatabase.getInstance().getReference()
 
-        } else {
-            LaunchedEffect(key1 = true) {
-                db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
-                    //con el id de la carta rellenamos los campos
+        when (posiblecartas[currentIndex]) {
+            "Rojo" -> {
+                posiblecartas[currentIndex] = cartauno.toString()
+            }
+
+            "Azul" -> {
+                posiblecartas[currentIndex] = cartaunoazul.toString()
+            }
+
+            "Amarillo" -> {
+                posiblecartas[currentIndex] = cartaunoamarilla.toString()
+            }
+
+            "Verde" -> {
+                posiblecartas[currentIndex] = cartaunoverde.toString()
+
+            }
+
+            else -> {
+                posiblecartas[currentIndex] = cartauno.toString()
+            }
+        }
+        Box(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 40.dp)) {
+            Image(
+                ImageBitmap.imageResource(posiblecartas[currentIndex].toInt()),
+                contentDescription = "",
+                modifier = Modifier
+                    .height(300.dp)
+                    .width(185.dp)
+                    .border(2.dp, Color.Black)
+
+            )
+
+            Text(
+                text = "$numero\n--",
+                color = Color.Black,
+                fontSize = 50.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+                modifier = Modifier.padding(7.dp)
+
+            )
+            Text(
+                text = "$numero",
+                color = Color.Black,
+                fontSize = 160.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+                modifier = Modifier
+                    //El numero tiene que tener color por dentro
+                    .padding(7.dp).align(Alignment.Center),
+
+                )
+            Text(
+                text = "$numero \n--",
+                color = Color.Black,
+                fontSize = 50.sp,
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
+                modifier = Modifier.rotate(180f)
+                    .padding(7.dp)
+                    .align(Alignment.BottomEnd)
+
+            )
+        }
+        Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                if (posiblecartas.isEmpty()) {
+                    Text("No items to display")
+
+                } else {
+                    fun moveBackward() {
+                        currentIndex =
+                            if (currentIndex > 0) currentIndex - 1 else posiblecartas.size - 1
+                    }
+
+                    fun moveForward() {
+                        currentIndex =
+                            if (currentIndex < posiblecartas.size - 1) currentIndex + 1 else 0
+                    }
+                    Button(
+                        onClick = { moveBackward() },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Previous"
+                        )
+                    }
+
+                    Button(
+                        onClick = { moveForward() },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Next"
+                        )
+                    }
+
+                }
+            }
+            Row(
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Button(modifier = Modifier.padding(end = 8.dp).width(70.dp), onClick = {
+                    numero++
+                    if (numero == 10) {
+                        numero = 0
+                    }
+
+                }) {
+                    Text("+", modifier = Modifier.align(Alignment.CenterVertically))
+                }
+                Button(modifier = Modifier.padding(start = 8.dp).width(70.dp), onClick = {
+                    numero--
+                    if (numero == -1) {
+                        numero = 9
+                    }
+                }) {
+                    Text("-", modifier = Modifier.align(Alignment.CenterVertically))
+                }
+            }
+
+            TextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = { Text("Nombre De la Carta") },
+                modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                    .border(2.dp, Color.Black)
+            )
+
+            TextField(
+                value = descripcion,
+                onValueChange = { descripcion = it },
+                label = { Text("Descripcion") },
+                modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                    .border(2.dp, Color.Black)
+            )
+            TextField(
+                value = precio,
+                onValueChange = { precio = it.replace(",", ".") },
+                label = { Text("Precio €") },
+                modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+                    .border(2.dp, Color.Black)
+            )
+        }
+
+
+        TextButton(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
+            //comprobamos que existan valores en los campos
+            db_ref = FirebaseDatabase.getInstance().getReference()
+            if (nombre.isEmpty() || descripcion.isEmpty() || precio.isEmpty()) {
+                Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT)
+                    .show()
+                return@TextButton
+            } else if (nombre.length > 20) {
+                Toast.makeText(
+                    context,
+                    "El nombre no puede tener mas de 20 caracteres",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@TextButton
+            } else if (descripcion.length > 50) {
+                Toast.makeText(
+                    context,
+                    "La descripcion no puede tener mas de 50 caracteres",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@TextButton
+            } else if (precio.toDoubleOrNull() == null) {
+                Toast.makeText(
+                    context,
+                    "El precio tiene que ser un numero",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+                return@TextButton
+            } else {
+                db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
+                    var sharedPreferences: SharedPreferences =
+                        context.getSharedPreferences("username", MODE_PRIVATE)
+                    var user = sharedPreferences.getString("username", "")
+                    Log.d("user", user.toString())
                     for (i in it.children) {
-                        val carta = i.getValue(Carta::class.java)
-                        if (carta != null && carta.id == editar) {
-                            numero = carta.numero.toString().toInt()
-                            precio = carta.Precio.toString()
-                            descripcion = carta.descripcion.toString()
-                            nombre = carta.Nombre.toString()
-                            crearoeditar = true
-                            posiblecartas[currentIndex]
-                        }
-                    }
-                }
-            }
-        }
-
-            when (posiblecartas[currentIndex]) {
-                "Rojo" -> {
-                    posiblecartas[currentIndex] = cartauno.toString()
-                }
-
-                "Azul" -> {
-                    posiblecartas[currentIndex] = cartaunoazul.toString()
-                }
-
-                "Amarillo" -> {
-                    posiblecartas[currentIndex] = cartaunoamarilla.toString()
-                }
-
-                "Verde" -> {
-                    posiblecartas[currentIndex] = cartaunoverde.toString()
-
-                }
-
-                else -> {
-                    posiblecartas[currentIndex] = cartauno.toString()
-                }
-            }
-            Box(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 40.dp)) {
-                Image(
-                    ImageBitmap.imageResource(posiblecartas[currentIndex].toInt()),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .height(300.dp)
-                        .width(185.dp)
-                        .border(2.dp, Color.Black)
-
-                )
-
-                Text(
-                    text = "$numero\n--",
-                    color = Color.Black,
-                    fontSize = 50.sp,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-                    modifier = Modifier.padding(7.dp)
-
-                )
-                Text(
-                    text = "$numero",
-                    color = Color.Black,
-                    fontSize = 160.sp,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-                    modifier = Modifier
-                        //El numero tiene que tener color por dentro
-                        .padding(7.dp).align(Alignment.Center),
-
-                    )
-                Text(
-                    text = "$numero \n--",
-                    color = Color.Black,
-                    fontSize = 50.sp,
-                    fontFamily = androidx.compose.ui.text.font.FontFamily.Default,
-                    modifier = Modifier.rotate(180f)
-                        .padding(7.dp)
-                        .align(Alignment.BottomEnd)
-
-                )
-            }
-            Column(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    if (posiblecartas.isEmpty()) {
-                        Text("No items to display")
-
-                    } else {
-                        fun moveBackward() {
-                            currentIndex =
-                                if (currentIndex > 0) currentIndex - 1 else posiblecartas.size - 1
-                        }
-
-                        fun moveForward() {
-                            currentIndex =
-                                if (currentIndex < posiblecartas.size - 1) currentIndex + 1 else 0
-                        }
-                        Button(
-                            onClick = { moveBackward() },
-                            modifier = Modifier.padding(8.dp)
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                                contentDescription = "Previous"
+                        val usuario = i.getValue(UsuarioLogin::class.java)
+                        if (usuario != null && usuario.username == user.toString()) {
+                            Log.d("duro", posiblecartas[currentIndex].toString())
+                            var id_carta =
+                                db_ref.child("Uno").child("Tienda").push().key.toString()
+                            cartacreada.add(
+                                Carta(
+                                    user.toString(),
+                                    numero,
+                                    precio,
+                                    nombre,
+                                    descripcion,
+                                    id_carta,
+                                    posiblecartas[currentIndex]
+                                )
                             )
-                        }
 
-                        Button(
-                            onClick = { moveForward() },
-                            modifier = Modifier.padding(8.dp)
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = "Next"
-                            )
+
+
+                            EscribirCarta(db_ref, id_carta, cartacreada[0])
+                            Toast.makeText(context, "Carta Creada", Toast.LENGTH_SHORT)
+                                .show()
                         }
+                        cartacreada.clear()
 
                     }
                 }
-                Row(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Button(modifier = Modifier.padding(end = 8.dp).width(70.dp), onClick = {
-                        numero++
-                        if (numero == 10) {
-                            numero = 0
-                        }
 
-                    }) {
-                        Text("+", modifier = Modifier.align(Alignment.CenterVertically))
-                    }
-                    Button(modifier = Modifier.padding(start = 8.dp).width(70.dp), onClick = {
-                        numero--
-                        if (numero == -1) {
-                            numero = 9
-                        }
-                    }) {
-                        Text("-", modifier = Modifier.align(Alignment.CenterVertically))
-                    }
-                }
-
-                TextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre De la Carta") },
-                    modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
-                        .border(2.dp, Color.Black)
-                )
-
-                TextField(
-                    value = descripcion,
-                    onValueChange = { descripcion = it },
-                    label = { Text("Descripcion") },
-                    modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
-                        .border(2.dp, Color.Black)
-                )
-                TextField(
-                    value = precio,
-                    onValueChange = { precio = it.replace(",", ".") },
-                    label = { Text("Precio €") },
-                    modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
-                        .border(2.dp, Color.Black)
-                )
             }
 
-            if (!crearoeditar) {
-                TextButton(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
-                    //comprobamos que existan valores en los campos
-                    db_ref = FirebaseDatabase.getInstance().getReference()
-                    if (nombre.isEmpty() || descripcion.isEmpty() || precio.isEmpty()) {
-                        Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT)
-                            .show()
-                        return@TextButton
-                    } else if (nombre.length > 20) {
-                        Toast.makeText(
-                            context,
-                            "El nombre no puede tener mas de 20 caracteres",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@TextButton
-                    } else if (descripcion.length > 50) {
-                        Toast.makeText(
-                            context,
-                            "La descripcion no puede tener mas de 50 caracteres",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@TextButton
-                    } else if (precio.toDoubleOrNull() == null) {
-                        Toast.makeText(
-                            context,
-                            "El precio tiene que ser un numero",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                        return@TextButton
-                    } else {
-                        db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
-                            var sharedPreferences: SharedPreferences =
-                                context.getSharedPreferences("username", MODE_PRIVATE)
-                            var user = sharedPreferences.getString("username", "")
-                            Log.d("user", user.toString())
-                            for (i in it.children) {
-                                val usuario = i.getValue(UsuarioLogin::class.java)
-                                if (usuario != null && usuario.username == user.toString()) {
-                                    Log.d("duro", posiblecartas[currentIndex].toString())
-                                    var id_carta =
-                                        db_ref.child("Uno").child("Tienda").push().key.toString()
-                                    cartacreada.add(
-                                        Carta(
-                                            user.toString(),
-                                            numero,
-                                            precio,
-                                            nombre,
-                                            descripcion,
-                                            id_carta,
-                                            posiblecartas[currentIndex]
-                                        )
-                                    )
 
+        }) {
 
-
-                                    EscribirCarta(db_ref, id_carta, cartacreada[0])
-                                    Toast.makeText(context, "Carta Creada", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                                cartacreada.clear()
-
-                            }
-                        }
-
-                    }
-
-
-                }) {
-
-                    Text(
-                        text = "Crear Carta",
-                        modifier = modifier
-                            //tiene que estar al centro
-                            .background(Color.White)
-                            .border(2.dp, Color.Black)
-                            .wrapContentWidth()
-                            .padding(16.dp),
-                        fontSize = 22.sp,
-                    )
-                }
-            }else {
-                TextButton(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
-                    //comprobamos que existan valores en los campos
-                    db_ref = FirebaseDatabase.getInstance().getReference()
-                    if (nombre.isEmpty() || descripcion.isEmpty() || precio.isEmpty()) {
-                        Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT)
-                            .show()
-                        return@TextButton
-                    } else if (nombre.length > 20) {
-                        Toast.makeText(
-                            context,
-                            "El nombre no puede tener mas de 20 caracteres",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@TextButton
-                    } else if (descripcion.length > 50) {
-                        Toast.makeText(
-                            context,
-                            "La descripcion no puede tener mas de 50 caracteres",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@TextButton
-                    } else if (precio.toDoubleOrNull() == null) {
-                        Toast.makeText(
-                            context,
-                            "El precio tiene que ser un numero",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                        return@TextButton
-                    } else {
-                        db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
-                            var sharedPreferences: SharedPreferences =
-                                context.getSharedPreferences("username", MODE_PRIVATE)
-                            var user = sharedPreferences.getString("username", "")
-                            Log.d("user", user.toString())
-                            for (i in it.children) {
-                                val usuario = i.getValue(UsuarioLogin::class.java)
-                                if (usuario != null && usuario.username == user.toString()) {
-                                    Log.d("duro", posiblecartas[currentIndex].toString())
-                                    var id_carta =
-                                        db_ref.child("Uno").child("Tienda").child(editar!!).key.toString()
-                                    cartacreada.add(
-                                        Carta(
-                                            user.toString(),
-                                            numero,
-                                            precio,
-                                            nombre,
-                                            descripcion,
-                                            id_carta,
-                                            posiblecartas[currentIndex]
-                                        )
-                                    )
-
-
-
-                                    EditarCarta(db_ref, id_carta, cartacreada[0])
-                                    Toast.makeText(context, "Carta Editada", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                                cartacreada.clear()
-
-                            }
-                        }
-
-                    }
-
-
-                }) {
-
-                    Text(
-                        text = "Editar Carta",
-                        modifier = modifier
-                            //tiene que estar al centro
-                            .background(Color.White)
-                            .border(2.dp, Color.Black)
-                            .wrapContentWidth()
-                            .padding(16.dp),
-                        fontSize = 22.sp,
-                    )
-                }
-            }
+            Text(
+                text = "Crear Carta",
+                modifier = modifier
+                    //tiene que estar al centro
+                    .background(Color.White)
+                    .border(2.dp, Color.Black)
+                    .wrapContentWidth()
+                    .padding(16.dp),
+                fontSize = 22.sp,
+            )
         }
-
-
     }
+}
 
 
 

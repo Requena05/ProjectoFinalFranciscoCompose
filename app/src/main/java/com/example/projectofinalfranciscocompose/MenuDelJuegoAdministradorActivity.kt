@@ -5,9 +5,11 @@ import android.content.SharedPreferences
 import android.graphics.drawable.shapes.Shape
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -19,6 +21,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 //import para poder alinear el contenido del Scafold
@@ -39,9 +42,15 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
@@ -51,6 +60,8 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.FloatingActionButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -99,7 +110,9 @@ import org.checkerframework.checker.units.qual.A
 import androidx.core.content.edit
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import java.util.logging.Logger.global
 
 class MenuDelJuegoAdministradorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -119,13 +132,16 @@ class MenuDelJuegoAdministradorActivity : ComponentActivity() {
 
 
 }
+var vertienda=false
 
 @Composable
 fun MenuDelAdministrador(modifier: Modifier = Modifier) {
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-
+    var isDarkMode by remember { mutableStateOf(false) }
+    // Track the mode
     Scaffold { innerPadding ->
         ModalNavigationDrawer(
             drawerState = drawerState,
@@ -136,9 +152,113 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         .padding(16.dp),
                     drawerContainerColor = colorResource(R.color.black)
                 ) {
-                    ExtendedFloatingActionButton(modifier=Modifier.width(170.dp),
+                    ExtendedFloatingActionButton(
+                        text = { Text("Perfil") },
+                        icon = {
+                            Icon(
+                                Icons.Filled.AccountCircle,
+                                contentDescription = " ",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(30.dp)
+                            )
+                        },
+                        onClick = {
+                            scope.launch {
+                                Toast.makeText(context, "Perfil", Toast.LENGTH_SHORT).show()
 
-                        text = { Text("Añadir Carta") },
+                            }
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box {
+                        ExtendedFloatingActionButton(
+                            modifier = Modifier.width(190.dp),
+                            elevation=  FloatingActionButtonDefaults.elevation(10.dp),
+
+                            text = { Text("Ver pedidos") },
+                            icon = {
+                                Icon(
+                                    Icons.Filled.Notifications,
+                                    contentDescription = " ",
+                                    modifier = Modifier
+                                        .width(20.dp)
+                                        .height(30.dp)
+                                )
+                            },
+                            onClick = {
+                                scope.launch {
+                                    Log.d("<", "1")
+                                }
+                            },
+                        )
+                        Text(text = "0",
+                            modifier=Modifier
+                                .align(Alignment.TopEnd)
+                                .size(30.dp)
+                                .background(
+                                    colorResource(R.color.fondo3),
+                                    shape = RoundedCornerShape(100)
+                                )
+                                .border(2.dp, Color.Black, shape = RoundedCornerShape(100))
+                                .padding(3.dp)
+
+                            ,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            color = Color.Black,
+                            fontSize = 12.sp
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.width(190.dp),
+                        elevation=  FloatingActionButtonDefaults.elevation(10.dp),
+
+                        text = { Text("Ver Tienda") },
+                        icon = {
+                            Icon(
+                                Icons.Default.ShoppingCart,
+                                contentDescription = " ",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(30.dp)
+                            )
+                        },
+                        onClick = {
+                            scope.launch {
+                                //Si se pulsa este boton el lazyRow se actualiza pero con los datos de la base de datos (publicaciones)
+                                vertienda=true
+                            }
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.width(190.dp),
+                        elevation=  FloatingActionButtonDefaults.elevation(10.dp),
+
+                        text = { Text("Ver Almacen") },
+                        icon = {
+                            Icon(
+                                Icons.Default.ShoppingCart,
+                                contentDescription = " ",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(30.dp)
+                            )
+                        },
+                        onClick = {
+                            scope.launch {
+                                //Si se pulsa este boton el lazyRow se actualiza pero con los datos de la base de datos (publicaciones)
+                                vertienda = false
+                            }
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.width(190.dp),
+                        elevation=  FloatingActionButtonDefaults.elevation(10.dp),
+
+                        text = { Text("Agregar Partidas") },
                         icon = {
                             Icon(
                                 Icons.Filled.Add,
@@ -150,14 +270,60 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         },
                         onClick = {
                             scope.launch {
+                                Log.d("<", "1")
+                            }
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    //Haz un boton para activar desactivar el modo noche
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.width(190.dp),
+                        elevation=  FloatingActionButtonDefaults.elevation(10.dp),
+                        onClick = {
+                            isDarkMode = !isDarkMode
+                            if (isDarkMode) {
+                                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                            } else {
+                                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                            }
+                        },
+                        icon = {
+                            Icon(modifier = Modifier
+                                .width(20.dp)
+                                .height(30.dp),
+                                imageVector = if (isDarkMode) Icons.Filled.ArrowDropDown else Icons.Filled.KeyboardArrowUp,
+                                contentDescription = if (isDarkMode) "Disable Dark Mode" else "Enable Dark Mode",
+                            )
+                        },
+                        text = { Text(if (isDarkMode) "Disable Dark Mode" else "Enable Dark Mode") },
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.width(190.dp),
+                        elevation=  FloatingActionButtonDefaults.elevation(10.dp),
+                        text = { Text("Agregar Carta") },
+                        icon = {
+                            Icon(
+                                Icons.Filled.Add,
+                                contentDescription = " ",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(30.dp)
+                            )
+                        },
+                        onClick = {
+                            scope.launch {
+                                var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
+                                sp.edit().putString("carta", " ").apply()
                                 val intent = Intent(context, AñadirCartaActivity::class.java)
                                 context.startActivity(intent)
                             }
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    ExtendedFloatingActionButton(modifier=Modifier.width(170.dp),
-
+                    ExtendedFloatingActionButton(
+                        modifier = Modifier.width(190.dp),
+                        elevation=  FloatingActionButtonDefaults.elevation(10.dp),
                         text = { Text("Cerrar Sesion") },
                         icon = {
                             Icon(
@@ -179,39 +345,7 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Box {
-                        ExtendedFloatingActionButton(modifier=Modifier.width(170.dp),
 
-                            text = { Text("Ver pedidos") },
-                            icon = {
-                                Icon(
-                                    Icons.Filled.Add,
-                                    contentDescription = " ",
-                                    modifier = Modifier
-                                        .width(20.dp)
-                                        .height(30.dp)
-                                )
-                            },
-                            onClick = {
-                                scope.launch {
-                                    Log.d("<", "1")
-                                }
-                            },
-                        )
-                        Text(text = "0",
-                            modifier=Modifier
-                                .align(Alignment.TopEnd)
-                                .size(30.dp)
-                                .background(colorResource(R.color.fondo3), shape = RoundedCornerShape(100))
-                                .border(2.dp, Color.Black, shape = RoundedCornerShape(100))
-                                .padding(3.dp)
-
-                        ,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                            color = Color.Black,
-                            fontSize = 12.sp
-                        )
-                    }
                 }
             },
             modifier = Modifier.background(colorResource(R.color.fondo))
@@ -279,15 +413,21 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
 fun CardSlider(modifier: Modifier = Modifier) {
     var arrayCarta by remember { mutableStateOf<List<Carta>>(emptyList()) }
     var db_ref = FirebaseDatabase.getInstance().reference
-    var cartaref=db_ref.child("Uno").child("Tienda")
-
-    //LaunchedEffect will fetch the data when the component is displayed
+    var cartaref: DatabaseReference
+    var vertienda_actual by remember { mutableStateOf(vertienda) }
+    if (vertienda_actual) {
+        cartaref = db_ref.child("Uno").child("Publicacion")
+    }else{
+        cartaref = db_ref.child("Uno").child("Tienda")
+    }
 
     LaunchedEffect(key1 = true) {
+
         val valueEventListener = object : ValueEventListener {
 
 
             override fun onDataChange(snapshot: DataSnapshot) {
+
                 for (i in snapshot.children) {
                     val carta = i.getValue(Carta::class.java)
                     if (carta != null) {
@@ -304,9 +444,9 @@ fun CardSlider(modifier: Modifier = Modifier) {
                                 Log.d("array", arrayCarta.toString())
                             }
                         }
-
-
                     }
+                    //tiene que actualizar todoo el lazyRow
+
                 }
             }
 
@@ -319,21 +459,38 @@ fun CardSlider(modifier: Modifier = Modifier) {
         cartaref.addValueEventListener(valueEventListener)
 
 
-
-        db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
-            val tempArray = mutableListOf<Carta>()
-            for (i in it.children) {
-                val carta = i.getValue(Carta::class.java)
-                if (carta != null) {
-                    tempArray.add(carta)
+        if (vertienda_actual) {
+            db_ref.child("Uno").child("Publicacion").get().addOnSuccessListener {
+                val tempArray = mutableListOf<Carta>()
+                for (i in it.children) {
+                    val carta = i.getValue(Carta::class.java)
+                    if (carta != null) {
+                        tempArray.add(carta)
+                    }
+                    //si en tempArray existen valores repetidos se eliminan
+                    tempArray.distinct()
                 }
-                //si en tempArray existen valores repetidos se eliminan
-                tempArray.distinct()
+                arrayCarta = tempArray
+                Log.d("array", arrayCarta.toString())
+                Log.d("arraysiez", arrayCarta.size.toString())
             }
-            arrayCarta = tempArray
-            Log.d("array", arrayCarta.toString())
-            Log.d("arraysiez", arrayCarta.size.toString())
+        }else{
+            db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
+                val tempArray = mutableListOf<Carta>()
+                for (i in it.children) {
+                    val carta = i.getValue(Carta::class.java)
+                    if (carta != null) {
+                        tempArray.add(carta)
+                    }
+                    //si en tempArray existen valores repetidos se eliminan
+                    tempArray.distinct()
+                }
+                arrayCarta = tempArray
+                Log.d("array", arrayCarta.toString())
+                Log.d("arraysiez", arrayCarta.size.toString())
+            }
         }
+
     }
 
 
@@ -364,6 +521,7 @@ fun AnimatedCard(card: Carta) {
     val targetOffsetY = if (isExpanded) (screenHeight - targetHeight) / 4 else 0.dp
     val targetElevation = if (isExpanded) 16.dp else 10.dp
     val targetZIndex = if (isExpanded) 10f else 0f
+    var vertienda_actual by remember { mutableStateOf(vertienda) }
 
     val animatedWidth by animateDpAsState(
         targetValue = targetWidth,
@@ -381,10 +539,6 @@ fun AnimatedCard(card: Carta) {
         targetValue = targetOffsetY,
         animationSpec = tween(durationMillis = 500), label = ""
     )
-    val animatedElevation by animateDpAsState(
-        targetValue = targetElevation,
-        animationSpec = tween(durationMillis = 500), label = ""
-    )
     val animatedZIndex by animateDpAsState(
         targetValue = targetZIndex.dp,
         animationSpec = tween(durationMillis = 500), label = ""
@@ -400,17 +554,15 @@ fun AnimatedCard(card: Carta) {
                 .offset(x = animatedOffsetX, y = animatedOffsetY)
                 .width(animatedWidth)
                 .height(animatedHeight)
-                .padding(4.dp)
-                .shadow(animatedElevation)
+                .padding(10.dp).border(2.dp, Color.Black,shape = RoundedCornerShape(15.dp))
                 .clickable { isExpanded = !isExpanded },
-            elevation = CardDefaults.cardElevation(0.dp)
+            elevation = CardDefaults.cardElevation(10.dp)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 var imagenResourse = when (card.imagen) {
-                    "2130968581" -> R.drawable.cartaunoazul
-                    "2130968580" -> R.drawable.cartaunoamarilla
-                    "2130968579" -> R.drawable.cartauno
-                    "2130968582" -> R.drawable.cartaunoverde
+                    "2131165276" -> R.drawable.cartaunoazul
+                    "2131165274" -> R.drawable.cartauno
+                    "2131165277" -> R.drawable.cartaunoverde
                     else -> R.drawable.cartaunoamarilla
                 }
                 Image(
@@ -424,29 +576,32 @@ fun AnimatedCard(card: Carta) {
 
                 if (isExpanded) {
                     //que cambie los datos cuando la carta se expande
-                        //tiene que esperar a que se cargue la carta
+                    //tiene que esperar a que se cargue la carta
 
 
 
 
-                        Column(
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = "Nombre: ${card.Nombre}", fontSize = 24.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Descripción: ${card.descripcion}", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Precio: ${card.Precio}€", fontSize = 20.sp)
+                        Row(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Text(text = "Nombre: ${card.Nombre}", fontSize = 24.sp)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "Descripción: ${card.descripcion}", fontSize = 18.sp)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = "Precio: ${card.Precio}€", fontSize = 20.sp)
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp),
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
+                            if (vertienda){
+                                Log.d("carta",card.toString())
+                            }else{
                                 Button(modifier = Modifier.wrapContentWidth(), onClick = {
                                     db_ref = FirebaseDatabase.getInstance().getReference()
                                     card.publicada=true
@@ -461,37 +616,55 @@ fun AnimatedCard(card: Carta) {
                                         maxLines = 1
                                     )
                                 }
+                            }
 
-                                Button(modifier = Modifier.wrapContentWidth(), onClick = {
-                                    db_ref = FirebaseDatabase.getInstance().getReference()
+
+                            Button(modifier = Modifier.wrapContentWidth(), onClick = {
+                                db_ref = FirebaseDatabase.getInstance().getReference()
+                                if(vertienda_actual){
+                                    Util.BorrarPublicacion(db_ref, card!!.id_creador.toString())
+                                }else{
                                     Util.borrarCarta(db_ref, card!!.id_creador.toString())
-                                    isExpanded=false
-                                })
-                                    {
-                                    Text("Eliminar",
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1
-                                    )
 
                                 }
-                                var context = LocalContext.current
-                                Button(modifier = Modifier.wrapContentWidth(), onClick = {
-                                    db_ref = FirebaseDatabase.getInstance().getReference()
-                                    val intent = Intent(context, AñadirCartaActivity::class.java)
-                                    //crea una sp para pasar toda la carta para que se pueda editar
-                                    val sharedPreferences = context.getSharedPreferences("comun", 0)
-                                    sharedPreferences.edit { putString("carta", card.id_creador ) }
-                                    context.startActivity(intent)
-
-                                }) {
-                                    Text(
-                                        "Editar",
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1
-                                    )
-                                }
+                                isExpanded=false
+                            })
+                            {
+                                Text("Eliminar",
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1
+                                )
 
                             }
+                            var context = LocalContext.current
+                            Button(modifier = Modifier.wrapContentWidth(), onClick = {
+                                db_ref = FirebaseDatabase.getInstance().getReference()
+                                if(vertienda_actual){
+                                    Toast.makeText(context, "Carta ya publicada no se puede editar", Toast.LENGTH_SHORT).show()
+                                }else {
+                                    val intent =
+                                        Intent(context, AñadirCartaActivity::class.java)
+                                    //crea una sp para pasar toda la carta para que se pueda editar
+                                    val sharedPreferences =
+                                        context.getSharedPreferences("comun", 0)
+                                    sharedPreferences.edit {
+                                        putString(
+                                            "carta",
+                                            card.id_creador
+                                        )
+                                    }
+                                    context.startActivity(intent)
+                                }
+
+                            }) {
+                                Text(
+                                    "Editar",
+                                    overflow = TextOverflow.Ellipsis,
+                                    maxLines = 1
+                                )
+                            }
+
+                        }
                     }
 
                 } else {

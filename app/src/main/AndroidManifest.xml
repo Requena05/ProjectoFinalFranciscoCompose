@@ -13,6 +13,11 @@
         android:theme="@style/Theme.ProjectoFinalFranciscoCompose"
         tools:targetApi="31">
         <activity
+            android:name=".AgregarPartidaActivity"
+            android:exported="false"
+            android:label="@string/title_activity_agregar_partida"
+            android:theme="@style/Theme.ProjectoFinalFranciscoCompose" />
+        <activity
             android:name=".AñadirCartaActivity"
             android:exported="false"
             android:label="@string/title_activity_añadir_carta"

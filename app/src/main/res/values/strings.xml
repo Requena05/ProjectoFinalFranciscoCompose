@@ -9,4 +9,5 @@
     <string name="title_activity_menu_del_juego_usuario">MenuDelJuegoUsuarioActivity</string>
     <string name="title_activity_añadir_carta">AñadirCartaActivity</string>
     <string name="title_activity_mazo">MazoActivity</string>
+    <string name="title_activity_agregar_partida">AgregarPartidaActivity</string>
 </resources>

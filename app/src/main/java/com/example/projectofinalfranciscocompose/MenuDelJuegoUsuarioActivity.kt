@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -357,10 +358,6 @@ fun AnimatedCardPublicada(card: Carta) {
         targetValue = targetOffsetY,
         animationSpec = tween(durationMillis = 500), label = ""
     )
-    val animatedElevation by animateDpAsState(
-        targetValue = targetElevation,
-        animationSpec = tween(durationMillis = 500), label = ""
-    )
     val animatedZIndex by animateDpAsState(
         targetValue = targetZIndex.dp,
         animationSpec = tween(durationMillis = 500), label = ""
@@ -376,17 +373,16 @@ fun AnimatedCardPublicada(card: Carta) {
                 .offset(x = animatedOffsetX, y = animatedOffsetY)
                 .width(animatedWidth)
                 .height(animatedHeight)
-                .padding(4.dp)
-                .shadow(animatedElevation)
+                .padding(10.dp).border(2.dp, Color.Black,shape = RoundedCornerShape(15.dp))
                 .clickable { isExpanded = !isExpanded },
-            elevation = CardDefaults.cardElevation(0.dp)
+            elevation = CardDefaults.cardElevation(10.dp)
+
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 var imagenResourse = when (card.imagen) {
-                    "2130968581" -> R.drawable.cartaunoazul
-                    "2130968580" -> R.drawable.cartaunoamarilla
-                    "2130968579" -> R.drawable.cartauno
-                    "2130968582" -> R.drawable.cartaunoverde
+                    "2131165276" -> R.drawable.cartaunoazul
+                    "2131165274" -> R.drawable.cartauno
+                    "2131165277" -> R.drawable.cartaunoverde
                     else -> R.drawable.cartaunoamarilla
                 }
                 Image(
