@@ -325,7 +325,7 @@ fun EditarCarta(modifier: Modifier = Modifier) {
                                 Carta(
                                     user.toString(),
                                     numero,
-                                    precio,
+                                    precio.toInt(),
                                     nombre,
                                     descripcion,
                                     id_carta,
@@ -371,8 +371,7 @@ fun CrearCarta(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .background(colorResource(R.color.fondo2))
     ) {
-        var cartacreada: MutableList<Carta>
-        cartacreada = mutableListOf()
+        var cartacreada: MutableList<Carta> = mutableListOf()
 
 
         var posiblecartas: MutableList<String>
@@ -386,7 +385,7 @@ fun CrearCarta(modifier: Modifier = Modifier) {
 
 
         var numero by remember { mutableStateOf(0) }
-        var precio by remember { mutableStateOf("") }
+        var precio by remember { mutableStateOf(0) }
         var descripcion by remember { mutableStateOf("") }
         var currentIndex by remember { mutableStateOf(0) }
         var nombre by remember { mutableStateOf("") }
@@ -533,8 +532,13 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                     .border(2.dp, Color.Black)
             )
             TextField(
-                value = precio,
-                onValueChange = { precio = it.replace(",", ".") },
+                value = precio.toString(),
+                onValueChange = { if(it.isNotEmpty()&&it.toIntOrNull()!=null){
+                    precio = it.toString().toInt()
+                }else{
+                    Toast.makeText(context, "Solo puedes introducir numeros", Toast.LENGTH_SHORT).show()
+
+                } },
                 label = { Text("Precio €") },
                 modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
                     .border(2.dp, Color.Black)
@@ -545,7 +549,7 @@ fun CrearCarta(modifier: Modifier = Modifier) {
         TextButton(modifier = Modifier.align(Alignment.CenterHorizontally), onClick = {
             //comprobamos que existan valores en los campos
             db_ref = FirebaseDatabase.getInstance().getReference()
-            if (nombre.isEmpty() || descripcion.isEmpty() || precio.isEmpty()) {
+            if (nombre.isEmpty() || descripcion.isEmpty() || precio.toString().isEmpty()) {
                 Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT)
                     .show()
                 return@TextButton
@@ -563,14 +567,11 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                     Toast.LENGTH_SHORT
                 ).show()
                 return@TextButton
-            } else if (precio.toDoubleOrNull() == null) {
+            } else if (precio.toString().toDoubleOrNull() == null) {
                 Toast.makeText(
                     context,
                     "El precio tiene que ser un numero",
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-                return@TextButton
+                    Toast.LENGTH_SHORT).show()
             } else {
                 db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
                     var sharedPreferences: SharedPreferences =
@@ -587,7 +588,7 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                                 Carta(
                                     user.toString(),
                                     numero,
-                                    precio,
+                                    precio.toString().toInt(),
                                     nombre,
                                     descripcion,
                                     id_carta,

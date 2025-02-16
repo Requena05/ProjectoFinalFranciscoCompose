@@ -410,22 +410,7 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                        )
                    }
 
-
-                            IconButton (
-                                modifier = Modifier.size(70.dp),
-                            onClick = {
-
-                                }
-                            )
-                            {
-                                Icon(
-                                    Icons.Filled.Add,
-                                    contentDescription = " ",modifier=Modifier.size(40.dp)
-                                        .padding(2.dp))
-                            }
-
-
-                    IconButton(modifier = Modifier.size(70.dp), onClick = {
+                    IconButton(modifier = Modifier.size(70.dp).align(Alignment.CenterVertically), onClick = {
                         scope.launch {
                             if (drawerState.isClosed) {
                                 drawerState.open()

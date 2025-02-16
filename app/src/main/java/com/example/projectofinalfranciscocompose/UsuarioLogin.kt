@@ -10,7 +10,7 @@ data class UsuarioLogin(
     val password: String?="",
     val fechaNacimiento: String?="",
     val tipo: Int?=0,
-
+    val mazo: Mazo?= Mazo(),
     //tipo 1 será un jugador y tipo 2 será un administrador
 
     ): Serializable

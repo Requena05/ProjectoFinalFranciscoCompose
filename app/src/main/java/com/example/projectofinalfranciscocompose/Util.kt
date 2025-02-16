@@ -34,6 +34,13 @@ class Util {
             db_ref.child("Uno").child("Tienda").child(id).setValue(carta)
 
         }
+        fun CrearPartida(db_ref: DatabaseReference, id: String, partida: Partida) {
+            db_ref.child("Uno").child("Partidas").child(id).setValue(partida)
+        }
+
+
+
+
         fun CrearMazo(db_ref: DatabaseReference, id: String, mazo: Mazo) {
             db_ref.child("Uno").child("Mazos").child(id).setValue(mazo)
         }
