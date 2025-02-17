@@ -134,6 +134,24 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
+
+                    ExtendedFloatingActionButton(
+                        text = { Text("Jugar Partida") },
+                        icon = {
+                            Icon(
+                                Icons.Filled.Close,
+                                contentDescription = " ",
+                                modifier = Modifier
+                                    .width(20.dp)
+                                    .height(30.dp)
+                            )
+                        },
+                        onClick = {
+                            val intent = Intent(context, MenuEleccionPartidaActivity::class.java)
+                            context.startActivity(intent)
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     ExtendedFloatingActionButton(
                         text = { Text("Cerrar Sesion") },
                         icon = {

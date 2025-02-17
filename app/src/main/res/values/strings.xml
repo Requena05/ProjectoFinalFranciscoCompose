@@ -10,4 +10,5 @@
     <string name="title_activity_añadir_carta">AñadirCartaActivity</string>
     <string name="title_activity_mazo">MazoActivity</string>
     <string name="title_activity_agregar_partida">AgregarPartidaActivity</string>
+    <string name="title_activity_menu_eleccion_partida">MenuEleccionPartidaActivity</string>
 </resources>
