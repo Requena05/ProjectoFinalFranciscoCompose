@@ -4,6 +4,8 @@ import java.io.Serializable
 
 data class Mazo(
     var id_propietario:String?=" ",
-    var lista_cartas:MutableList<Carta>?= MutableList(8,{Carta()})
+    var lista_cartas:MutableList<Carta>?= mutableListOf()
 
-    ):Serializable
+    ):Serializable {
+
+}

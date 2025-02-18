@@ -18,6 +18,11 @@
             android:label="@string/title_activity_menu_eleccion_partida"
             android:theme="@style/Theme.ProjectoFinalFranciscoCompose" />
         <activity
+            android:name=".MazoActivity"
+            android:exported="false"
+            android:label="@string/title_activity_mazo"
+            android:theme="@style/Theme.ProjectoFinalFranciscoCompose" />
+        <activity
             android:name=".AgregarPartidaActivity"
             android:exported="false"
             android:label="@string/title_activity_agregar_partida"

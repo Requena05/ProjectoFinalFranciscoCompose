@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.util.Log
@@ -293,7 +294,15 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
                          }else{
 
                             escribirUsuario(db_ref, text_username, usuario)
-                            val intent = Intent(context, MainActivity::class.java)
+                             if(tipo==1){
+                                 var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
+                                 var db_ref = FirebaseDatabase.getInstance().getReference()
+                                 var user = sp.getString("username", null)
+                                 Util.CrearMazo(db_ref, user.toString(), Mazo(user.toString()))
+                             }
+
+
+                             val intent = Intent(context, MainActivity::class.java)
                             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                             context.startActivity(intent)
                             Toast.makeText(context, "Usuario registrado correctamente", Toast.LENGTH_SHORT).show()

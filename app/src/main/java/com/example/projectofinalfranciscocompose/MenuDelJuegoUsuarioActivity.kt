@@ -83,9 +83,12 @@ import kotlinx.coroutines.launch
 
 class MenuDelJuegoUsuarioActivity : ComponentActivity() {
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+
         setContent {
             ProjectoFinalFranciscoComposeTheme {
                 MenuOpciones()
@@ -96,16 +99,18 @@ class MenuDelJuegoUsuarioActivity : ComponentActivity() {
         sp.edit().putBoolean("islogued", true).apply()
         sp.edit().putInt("tipo",1).apply()
 
-
     }
 
 }
 
+
 @Composable
 fun MenuOpciones(modifier: Modifier = Modifier) {
+    var context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+
+
     Scaffold { innerPadding ->
         ModalNavigationDrawer(
             drawerState = drawerState,
@@ -232,7 +237,8 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                     IconButton(modifier = Modifier
                         .size(40.dp)
                         .padding(2.dp), onClick = {
-                        // TODO:
+                            val intent = Intent(context, MazoActivity::class.java)
+                            context.startActivity(intent)
                     }){
                         Image(ImageBitmap.imageResource(R.drawable.mazo),contentDescription = "mazo")
                     }
@@ -443,15 +449,15 @@ fun AnimatedCardPublicada(card: Carta) {
                                 //Creamos el mazo del usuario con su id
                                 var db_ref = FirebaseDatabase.getInstance().getReference()
                                 //Ahora añadimos esta carta a una lista para pasarsela al mazo antes comprobamos si existe
-                                var lista: MutableList<Carta>
-                                lista = mutableListOf()
-                                lista.add(card)
-                                Log.d("lista", lista.toString())
+
                                 Log.d("card", card.id_creador.toString())
-                                var user= context.getSharedPreferences("username",0)
-                                Util.CrearMazo(db_ref, card.id_creador.toString(), Mazo(user.getString("username", ""), lista))
-                                lista.clear()
-                                Toast.makeText(context, "Carta Añadida comprada con exito", Toast.LENGTH_SHORT).show()
+
+                                var sp:SharedPreferences=context.getSharedPreferences("comun",0)
+                                //recogemos el valor de username
+                                var user= sp.getString("username",null)
+                                //si el mazo esta creado no lo creamos
+                                Util.AgregarCartasalmazo(db_ref,user.toString(),card)
+                                Toast.makeText(context, "Carta Añadida", Toast.LENGTH_SHORT).show()
                             }) {
                                 Text(
                                     "Comprar",

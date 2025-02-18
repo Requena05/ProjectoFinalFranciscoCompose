@@ -44,8 +44,11 @@ class Util {
         fun CrearMazo(db_ref: DatabaseReference, id: String, mazo: Mazo) {
             db_ref.child("Uno").child("Mazos").child(id).setValue(mazo)
         }
+
         fun AgregarCartasalmazo(db_ref: DatabaseReference, id: String, carta: Carta) {
-            db_ref.child("Uno").child("Mazos").child(id).child("lista_cartas").push().setValue(carta)
+            db_ref.child("Uno").child("Mazos").child(id).child("lista_cartas").child(carta.id_creador.toString()).setValue(carta)
+            //si ya existe la lista dentro de la base de datos se añade la carta
+
             Log.d("carta",carta.toString())
         }
         fun BorrarCartasalmazo(db_ref: DatabaseReference, id: String, carta: Carta) {
