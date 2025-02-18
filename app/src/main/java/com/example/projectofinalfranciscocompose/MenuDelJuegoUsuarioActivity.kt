@@ -96,6 +96,7 @@ class MenuDelJuegoUsuarioActivity : ComponentActivity() {
         sp.edit().putBoolean("islogued", true).apply()
         sp.edit().putInt("tipo",1).apply()
 
+
     }
 
 }
@@ -437,7 +438,20 @@ fun AnimatedCardPublicada(card: Carta) {
                                 .height(50.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
+                            var context = LocalContext.current
                             Button(modifier = Modifier.wrapContentWidth(), onClick = {
+                                //Creamos el mazo del usuario con su id
+                                var db_ref = FirebaseDatabase.getInstance().getReference()
+                                //Ahora añadimos esta carta a una lista para pasarsela al mazo antes comprobamos si existe
+                                var lista: MutableList<Carta>
+                                lista = mutableListOf()
+                                lista.add(card)
+                                Log.d("lista", lista.toString())
+                                Log.d("card", card.id_creador.toString())
+                                var user= context.getSharedPreferences("username",0)
+                                Util.CrearMazo(db_ref, card.id_creador.toString(), Mazo(user.getString("username", ""), lista))
+                                lista.clear()
+                                Toast.makeText(context, "Carta Añadida comprada con exito", Toast.LENGTH_SHORT).show()
                             }) {
                                 Text(
                                     "Comprar",

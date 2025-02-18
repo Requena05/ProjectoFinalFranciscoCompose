@@ -242,9 +242,6 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         onClick = {
                             //Si se pulsa este boton el lazyRow se actualiza pero con los datos de la base de datos (publicaciones)
                             vertienda = true
-                            Toast.makeText(context, vertienda.toString(), Toast.LENGTH_SHORT).show()
-
-
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -265,7 +262,6 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         onClick = {
                             //Si se pulsa este boton el lazyRow se actualiza pero con los datos de la base de datos (publicaciones)
                             vertienda = false
-                            Toast.makeText(context, vertienda.toString(), Toast.LENGTH_SHORT).show()
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -295,7 +291,7 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                     Spacer(modifier = Modifier.height(16.dp))
                     //Haz un boton para activar desactivar el modo noche
 
-                    Row(modifier=Modifier.border(0.dp, Color.Black, shape = RoundedCornerShape(12)).width(190.dp).background(colorResource(R.color.fondo4)
+                    Row(modifier=Modifier.border(0.dp, Color.Black, shape = RoundedCornerShape(12)).width(190.dp).background(colorResource(R.color.fondo4),
                     )) {
                         Text(text = "Modo noche",modifier=Modifier.align(Alignment.CenterVertically))
                         Switch( checked = isDarkMode,modifier=Modifier.align(Alignment.CenterVertically) ,onCheckedChange = { valor ->
@@ -464,11 +460,16 @@ fun CardSlider(modifier: Modifier = Modifier) {
 
 
             override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.childrenCount==0L){
 
+                    arrayCarta = emptyList()
+
+                }
                 for (i in snapshot.children) {
                     val carta = i.getValue(Carta::class.java)
                     if (carta != null) {
                         arrayCarta += carta
+                        Log.d("array", arrayCarta.toString())
                     }
                     //comparamos el size de las cartas de firebase con el size de nuestro array local
                     if (arrayCarta.size != snapshot.childrenCount.toInt()) {
@@ -482,7 +483,7 @@ fun CardSlider(modifier: Modifier = Modifier) {
                             }
                         }
                     }
-                    //tiene que actualizar todoo el lazyRow
+
 
                 }
             }

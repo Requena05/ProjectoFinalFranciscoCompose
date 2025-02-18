@@ -256,14 +256,10 @@ fun AnimatedPartida2(partida: Partida) {
 
 
                     }
-                    Row(modifier = Modifier.align(Alignment.BottomCenter)) {
+                    Row(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 10.dp)) {
                         //Crea dos botones para unirse a la partida o para salir de ella
                         Button(onClick = { /*TODO*/ }) {
                             Text(text = "Unirse")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(onClick = { /*TODO*/ }) {
-                            Text(text = "Salir")
                         }
 
                     }

@@ -16,4 +16,5 @@ data class Carta(
     var publicada:Boolean?=false
 
 
-): Serializable
+): Serializable {
+}
