@@ -61,16 +61,18 @@ class MenuEleccionPartidaActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        var tipo_usuario= intent.getIntExtra("tipo",0)
         setContent {
             ProjectoFinalFranciscoComposeTheme {
-                MenuEleccionPartida()
+                MenuEleccionPartida(modifier = Modifier,tipo_usuario)
             }
         }
+
     }
 }
 
 @Composable
-fun MenuEleccionPartida( modifier: Modifier = Modifier) {
+fun MenuEleccionPartida( modifier: Modifier = Modifier,tipo_usuario:Int?) {
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .background(colorResource(R.color.fondo))) { innerPadding ->
@@ -79,14 +81,20 @@ fun MenuEleccionPartida( modifier: Modifier = Modifier) {
             .fillMaxSize()
             .background(colorResource(R.color.fondo2)))
         {
-            PartidaSlider(modifier = Modifier)
+            //recogemos el intent que nos ha enviado el usuario
+            Log.d("tipo_usuario", tipo_usuario.toString())
+            if (tipo_usuario == 1){
+                PartidaSliderUsuario(modifier = Modifier)
+            }else{
+                PartidaSliderAdmin(modifier = Modifier)
+            }
 
 
         }
     }
 }
 @Composable
-fun PartidaSlider(modifier: Modifier = Modifier) {
+fun PartidaSliderUsuario(modifier: Modifier = Modifier) {
     var arrayPartida by remember { mutableStateOf<List<Partida>>(emptyList()) }
     var db_ref = FirebaseDatabase.getInstance().reference
     var partidaRef by remember { mutableStateOf(db_ref.child("Uno").child("Partidas")) }
@@ -140,6 +148,208 @@ fun PartidaSlider(modifier: Modifier = Modifier) {
             Log.d("card", card.toString())
             items(1) { index ->
                 AnimatedPartida2(card)
+            }
+        }
+    }
+}
+@Composable
+fun PartidaSliderAdmin(modifier: Modifier = Modifier) {
+    var arrayPartida by remember { mutableStateOf<List<Partida>>(emptyList()) }
+    var db_ref = FirebaseDatabase.getInstance().reference
+    var partidaRef by remember { mutableStateOf(db_ref.child("Uno").child("Partidas")) }
+
+    LaunchedEffect(key1 = true) {
+
+
+        val valueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val tempArray = mutableListOf<Partida>()
+                for (i in snapshot.children) {
+                    val partida = i.getValue(Partida::class.java)
+                    if (partida != null) {
+                        tempArray.add(partida)
+                    }
+
+                }
+                arrayPartida = tempArray
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("PartidaSlider", "Error al obtener datos de Firebase: ${error.message}")
+            }
+        }
+        partidaRef.addValueEventListener(valueEventListener)
+
+        // This is to load the data faster
+        partidaRef.get().addOnSuccessListener {
+            val tempArray = mutableListOf<Partida>()
+            for (i in it.children) {
+                val partida = i.getValue(Partida::class.java)
+                if (partida != null) {
+                    tempArray.add(partida)
+                }
+                //si en tempArray existen valores repetidos se eliminan
+                tempArray.distinct()
+            }
+            arrayPartida = tempArray
+            Log.d("array", arrayPartida.toString())
+            Log.d("arraysiez", arrayPartida.size.toString())
+        }
+    }
+
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(top = 50.dp)
+    ) {
+        Log.d("arra2ysize", arrayPartida.size.toString())
+        arrayPartida.forEach { card ->
+            Log.d("card", card.toString())
+            items(1) { index ->
+                AnimatedPartidaAdmin(card)
+            }
+        }
+    }
+}
+
+@Composable
+fun AnimatedPartidaAdmin(partida: Partida) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val targetWidth = if (isExpanded) screenWidth * 0.8f else 202.dp
+    val targetHeight = if (isExpanded) screenHeight * 0.6f else 250.dp
+    val targetOffsetX = if (isExpanded) (screenWidth - targetWidth) / 64 else 0.dp
+    val targetOffsetY = if (isExpanded) (screenHeight - targetHeight) / 128 else 0.dp
+    val targetElevation = if (isExpanded) 16.dp else 10.dp
+    val targetZIndex = if (isExpanded) 10f else 0f
+
+    val animatedHeight by animateDpAsState(
+        targetValue = targetHeight,
+        animationSpec = tween(durationMillis = 500), label = ""
+    )
+    val animatedOffsetX by animateDpAsState(
+        targetValue = targetOffsetX,
+        animationSpec = tween(durationMillis = 500), label = ""
+    )
+    val animatedOffsetY by animateDpAsState(
+        targetValue = targetOffsetY,
+        animationSpec = tween(durationMillis = 500), label = ""
+    )
+    val animatedZIndex by animateDpAsState(
+        targetValue = targetZIndex.dp,
+        animationSpec = tween(durationMillis = 500), label = ""
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .zIndex(animatedZIndex.value)
+    ) {
+        Card(
+            modifier = Modifier
+                .offset(x = animatedOffsetX, y = animatedOffsetY)
+                .fillMaxWidth()
+                .height(animatedHeight)
+                .padding(10.dp)
+                .border(
+                    2.dp,
+                    Color.Black, shape = RoundedCornerShape(15.dp)
+                )
+                .clickable { isExpanded = !isExpanded },
+            elevation = CardDefaults.cardElevation(targetElevation)
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    bitmap = ImageBitmap.imageResource(R.drawable.imagenpartidauno),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .border(2.dp, Color.Black),
+                    contentScale = ContentScale.Crop
+                )
+
+                if (isExpanded) {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = "Nombre: ${partida.nombre}", fontSize = 34.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif,
+                            color = Color.Black,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .fillMaxWidth().align(Alignment.CenterHorizontally).padding(top = 40.dp)
+                                .border(2.dp, Color.Black,shape = RoundedCornerShape(70))
+                                .background(colorResource(R.color.fondo4),shape = RoundedCornerShape(70))
+                                .height(50.dp),
+                            textAlign = TextAlign.Center)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(text = "Precio: ${partida.precio}€",  fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif,
+                            color = Color.Black,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .fillMaxWidth().align(Alignment.CenterHorizontally)
+                                .border(2.dp, Color.Black,shape = RoundedCornerShape(70))
+                                .background(colorResource(R.color.fondo4),shape = RoundedCornerShape(70))
+                                .height(50.dp),
+                            textAlign = TextAlign.Center)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "Jugadores: ${partida.lista_jugadores!!.size}/${partida.cantidad_jugadores}",
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif,
+                            fontSize = 24.sp,
+                            color = Color.Black,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .fillMaxWidth().align(Alignment.CenterHorizontally)
+                                .border(2.dp, Color.Black,shape = RoundedCornerShape(70))
+                                .background(colorResource(R.color.fondo4),shape = RoundedCornerShape(70))
+                                .height(50.dp),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Tiempo de espera: ${partida.tiempo_espera_partida} Min",
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif,
+                            color = Color.Black,
+                            maxLines = 1,
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .fillMaxWidth().align(Alignment.CenterHorizontally)
+                                .background(colorResource(R.color.fondo4),shape = RoundedCornerShape(70))
+                                .border(2.dp, Color.Black,shape = RoundedCornerShape(70))
+                                .height(50.dp),
+                            textAlign = TextAlign.Center
+                        )
+
+
+                    }
+                    Row(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 10.dp)) {
+                        //Crea dos botones para unirse a la partida o para salir de ella
+                        Button(onClick = {
+                            var db_ref = FirebaseDatabase.getInstance().reference
+                            var partidaRef = partida.id_partida.toString()
+                            Util.BorrarPartida(db_ref,partidaRef)
+                        }) {
+                            Text(text = "Eliminar")
+                        }
+
+                    }
+                }
             }
         }
     }
@@ -273,6 +483,6 @@ fun AnimatedPartida2(partida: Partida) {
 @Composable
 fun GreetingPreview8() {
     ProjectoFinalFranciscoComposeTheme {
-        MenuEleccionPartida()
+        MenuEleccionPartida(tipo_usuario = 1)
     }
 }

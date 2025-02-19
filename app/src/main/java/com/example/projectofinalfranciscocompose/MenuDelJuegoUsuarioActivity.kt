@@ -1,9 +1,16 @@
 package com.example.projectofinalfranciscocompose
 
+import android.app.Activity.RESULT_OK
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract.CommonDataKinds.Im
+import android.provider.Settings.Secure.putInt
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -37,6 +44,8 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,13 +57,17 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,16 +86,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.core.content.edit
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
+import com.example.projectofinalfranciscocompose.MenuDelJuegoUsuarioActivity.Companion.create_notification
 import com.example.projectofinalfranciscocompose.ui.theme.ProjectoFinalFranciscoComposeTheme
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
 
 class MenuDelJuegoUsuarioActivity : ComponentActivity() {
 
+    companion object {
+        val APP_ID = "com.example.seminarionotificacioneskotlinfranciscorequena"
+        val NOTIFICATION_ID = "${APP_ID}_c1"
+        val id = AtomicInteger(0)
+        fun create_notification(): Int {
+            return id.incrementAndGet()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +136,83 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
     var context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var db_ref = FirebaseDatabase.getInstance().reference
+    var buscarValor by rememberSaveable { mutableStateOf("") }
+    var cartaref= db_ref.child("Uno").child("Publicacion")
+    var arrayCarta = remember { mutableStateListOf<Carta>() }
+
+    var arrayCartaFiltrada = remember {
+        derivedStateOf {
+            arrayCarta.filter {
+                it.Nombre?.contains(buscarValor) == true
+            }
+        }
+    }
+
+
+    //LaunchedEffect will fetch the data when the component is displayed
+    LaunchedEffect(key1 = true, key2 = vertienda) {
+
+        val valueEventListener = object : ValueEventListener {
+
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.childrenCount==0L){
+
+                    arrayCarta.clear()
+
+                }
+                for (i in snapshot.children) {
+                    val carta = i.getValue(Carta::class.java)
+                    if (carta != null) {
+                        arrayCarta += carta
+                        Log.d("array", arrayCarta.toString())
+                    }
+                    //comparamos el size de las cartas de firebase con el size de nuestro array local
+                    if (arrayCarta.size != snapshot.childrenCount.toInt()) {
+                        //ahora actualiza el array local
+                        arrayCarta.clear()
+                        for (i in snapshot.children) {
+                            val carta = i.getValue(Carta::class.java)
+                            if (carta != null) {
+                                arrayCarta += carta
+                                Log.d("array", arrayCarta.toString())
+                            }
+                        }
+                    }
+
+
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("error", error.toString())
+            }
+
+
+        }
+        cartaref.addValueEventListener(valueEventListener)
+
+
+
+        cartaref.get().addOnSuccessListener {
+            val tempArray = mutableListOf<Carta>()
+            for (i in it.children) {
+                val carta = i.getValue(Carta::class.java)
+                if (carta != null) {
+                    tempArray.add(carta)
+                }
+                //si en tempArray existen valores repetidos se eliminan
+                tempArray.distinct()
+            }
+            arrayCarta.clear()
+            arrayCarta.addAll(tempArray)
+            Log.d("array", arrayCarta.toString())
+            Log.d("arraysiez", arrayCarta.size.toString())
+        }
+
+
+    }
 
 
     Scaffold { innerPadding ->
@@ -122,10 +226,10 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                     drawerContainerColor = colorResource(R.color.black)
                 ) {
                     ExtendedFloatingActionButton(
-                        text = { Text("Perfil") },
+                        text = { Text("About") },
                         icon = {
                             Icon(
-                                Icons.Filled.AccountCircle,
+                                Icons.Filled.Warning,
                                 contentDescription = " ",
                                 modifier = Modifier
                                     .width(20.dp)
@@ -134,8 +238,11 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                         },
                         onClick = {
                             scope.launch {
-                                Toast.makeText(context, "Perfil", Toast.LENGTH_SHORT).show()
-
+                                Toast.makeText(context, "About", Toast.LENGTH_SHORT).show()
+//                                val intent =
+//                                    Intent(context, AboutActivity::class.java)
+//                                context.startActivity(intent)
+                                drawerState.close()
                             }
                         },
                     )
@@ -145,7 +252,7 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                         text = { Text("Jugar Partida") },
                         icon = {
                             Icon(
-                                Icons.Filled.Close,
+                                Icons.Filled.PlayArrow,
                                 contentDescription = " ",
                                 modifier = Modifier
                                     .width(20.dp)
@@ -153,8 +260,14 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                             )
                         },
                         onClick = {
-                            val intent = Intent(context, MenuEleccionPartidaActivity::class.java)
-                            context.startActivity(intent)
+                            scope.launch {
+                                Toast.makeText(context, "Jugar Partida", Toast.LENGTH_SHORT).show()
+
+                                val intent = Intent(context, MenuEleccionPartidaActivity::class.java)
+                                intent.putExtra("tipo", 1)
+                                context.startActivity(intent)
+                                drawerState.close()
+                            }
                         },
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -172,32 +285,20 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                         onClick = {
                             scope.launch {
                                 val sharedPreferences = context.getSharedPreferences("comun", 0)
-                                sharedPreferences.edit { putBoolean("comun", false)}
-                                sharedPreferences.edit { putInt("tipo",0)}
+                                sharedPreferences.edit().putBoolean("comun", false)
+                                sharedPreferences.edit().putInt("tipo",0)
 
                                 val intent = Intent(context, MainActivity::class.java)
                                 context.startActivity(intent)
+                                drawerState.close()
                             }
                         },
                     )
+
+
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    ExtendedFloatingActionButton(
-                        text = { Text("Hacer Pedido") },
-                        icon = {
-                            Icon(
-                                Icons.Filled.Add,
-                                contentDescription = " ",
-                                modifier = Modifier
-                                    .width(20.dp)
-                                    .height(30.dp)
-                            )
-                        },
-                        onClick = {
-                            scope.launch {
-                                Toast.makeText(context, "Hacer Pedido", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                    )
+
                 }
             },
             modifier = Modifier.background(colorResource(R.color.fondo))
@@ -260,15 +361,30 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                             .padding(2.dp))
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
 
+                Spacer(modifier = Modifier.weight(1f))
+                Column(modifier = Modifier.fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp))
+                {
+                    //Crearemos una barra para buscar cartas por nombre en la tienda
+                    TextField(modifier=Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(),value = buscarValor,
+                        onValueChange = {
+                            buscarValor = it
+                        },
+                        label = { Text("Buscar Carta") })
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                }
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center
                 ) {
 
                     Row {
-                        CartasPublicadas()
+                        CartasPublicadas(arrayCartaFiltrada.value)
                     }
 
                 }
@@ -279,67 +395,7 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
     }
 }
 @Composable
-fun CartasPublicadas(modifier: Modifier = Modifier) {
-    var arrayCarta by remember { mutableStateOf<List<Carta>>(emptyList()) }
-    var db_ref = FirebaseDatabase.getInstance().reference
-    var cartaref=db_ref.child("Uno").child("Publicacion")
-
-    //LaunchedEffect will fetch the data when the component is displayed
-
-    LaunchedEffect(key1 = true) {
-        val valueEventListener = object : ValueEventListener {
-
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (i in snapshot.children) {
-                    val carta = i.getValue(Carta::class.java)
-                    if (carta != null) {
-                        arrayCarta += carta
-                    }
-                    //comparamos el size de las cartas de firebase con el size de nuestro array local
-                    if(arrayCarta.size!=snapshot.childrenCount.toInt()){
-                        //ahora actualiza el array local
-                        arrayCarta= emptyList()
-                        for (i in snapshot.children) {
-                            val carta = i.getValue(Carta::class.java)
-                            if (carta != null) {
-                                arrayCarta += carta
-                                Log.d("array", arrayCarta.toString())
-                            }
-                        }
-
-
-                    }
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.d("error", error.toString())
-            }
-
-
-        }
-        cartaref.addValueEventListener(valueEventListener)
-
-
-
-        db_ref.child("Uno").child("Publicacion").get().addOnSuccessListener {
-            val tempArray = mutableListOf<Carta>()
-            for (i in it.children) {
-                val carta = i.getValue(Carta::class.java)
-                if (carta != null) {
-                    tempArray.add(carta)
-                }
-                //si en tempArray existen valores repetidos se eliminan
-                tempArray.distinct()
-            }
-            arrayCarta = tempArray
-            Log.d("array", arrayCarta.toString())
-            Log.d("arraysiez", arrayCarta.size.toString())
-        }
-    }
-
-
+fun CartasPublicadas(arrayCarta: List<Carta>, modifier: Modifier = Modifier) {
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
@@ -347,14 +403,12 @@ fun CartasPublicadas(modifier: Modifier = Modifier) {
             .height(600.dp),
     ) {
         Log.d("arra2ysize", arrayCarta.size.toString())
-        arrayCarta.forEach { card ->
-            Log.d("card", card.toString())
-            items(1) { index ->
-                AnimatedCardPublicada(card=card)
-            }
+        items(arrayCarta.size) { index ->
+            AnimatedCardPublicada(card = arrayCarta[index])
         }
     }
 }
+
 @Composable
 fun AnimatedCardPublicada(card: Carta) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -446,21 +500,40 @@ fun AnimatedCardPublicada(card: Carta) {
                         ) {
                             var context = LocalContext.current
                             Button(modifier = Modifier.wrapContentWidth(), onClick = {
-                                //Creamos el mazo del usuario con su id
-                                var db_ref = FirebaseDatabase.getInstance().getReference()
-                                //Ahora añadimos esta carta a una lista para pasarsela al mazo antes comprobamos si existe
+                                Toast.makeText(context, "Carta Pedida", Toast.LENGTH_SHORT).show()
+//                                //Mandamos una peticion al administrador para que la acepte
+                                //Mandaremos con un Intent la carta que se va a pedir para que en un lazyRow que tendra el administrador se muestre la carta
+                                var db_ref = FirebaseDatabase.getInstance().reference
+                                var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
+                                var user = sp.getString("username", "").toString()
 
-                                Log.d("card", card.id_creador.toString())
+                                Util.CrearPedido(db_ref,user,card)
 
-                                var sp:SharedPreferences=context.getSharedPreferences("comun",0)
-                                //recogemos el valor de username
-                                var user= sp.getString("username",null)
-                                //si el mazo esta creado no lo creamos
-                                Util.AgregarCartasalmazo(db_ref,user.toString(),card)
-                                Toast.makeText(context, "Carta Añadida", Toast.LENGTH_SHORT).show()
+                                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+                                    val channelId= user.toString()
+                                    val channelName="Mi canal"
+                                    val notificationChannel= NotificationChannel(channelId,channelName,NotificationManager.IMPORTANCE_DEFAULT)
+                                    context.getSystemService(NotificationManager::class.java).createNotificationChannel(notificationChannel)
+
+
+                                }
+
+                                val builder= NotificationCompat.Builder(context,user.toString())
+                                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                    .setContentTitle("Hace mucho frio")
+                                    .setContentText("Abrigate o te pondrás malo. Mi id es $user")
+                                    .setColor(ContextCompat.getColor(context,R.color.fondo2))
+
+
+                                with(context.getSystemService<NotificationManager>()){
+                                    this?.notify(1,builder.build())
+                                    create_notification()
+
+                                }
+
                             }) {
                                 Text(
-                                    "Comprar",
+                                    "Pedir Carta",
                                     overflow = TextOverflow.Ellipsis,
                                     maxLines = 1
                                 )

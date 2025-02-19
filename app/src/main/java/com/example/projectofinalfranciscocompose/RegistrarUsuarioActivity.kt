@@ -275,8 +275,8 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
                 }else {
                 tipo = 1
                 }
-                val usuario = UsuarioLogin(text_name, text_username, text_email, text_password, selectedDate,tipo)
-                Log.d("tipoUSUS",usuario.tipo.toString())
+
+
                 if(text_email.isEmpty() || text_password.isEmpty() || text_username.isEmpty() || text_name.isEmpty() || selectedDate.isEmpty()){
                     Toast.makeText(context, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
 
@@ -292,8 +292,8 @@ fun ModoregistroUsuario( modifier: Modifier = Modifier) {
                          if(existeUsuario(Usuarios, text_username,)){
                              Toast.makeText(context, "El usuario ya existe", Toast.LENGTH_SHORT).show()
                          }else{
-
-                            escribirUsuario(db_ref, text_username, usuario)
+                             val usuario = UsuarioLogin(text_name, text_username, text_email, text_password, selectedDate,tipo)
+                            escribirUsuario(db_ref, text_username,usuario)
                              if(tipo==1){
                                  var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
                                  var db_ref = FirebaseDatabase.getInstance().getReference()

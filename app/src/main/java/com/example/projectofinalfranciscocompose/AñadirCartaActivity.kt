@@ -562,6 +562,10 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                     Toast.LENGTH_SHORT
                 ).show()
                 return@TextButton
+                //no puede haber dos cartas con el mismo nombre
+            }else if( db_ref.child("Uno").child("Tienda").get().toString().contains(nombre)){
+                Toast.makeText(context, "Ya existe una carta con ese nombre", Toast.LENGTH_SHORT).show()
+                return@TextButton
             } else if (descripcion.length > 50) {
                 Toast.makeText(
                     context,
@@ -575,39 +579,50 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                     "El precio tiene que ser un numero",
                     Toast.LENGTH_SHORT).show()
             } else {
-                db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
-                    var sharedPreferences: SharedPreferences =
-                        context.getSharedPreferences("username", MODE_PRIVATE)
-                    var user = sharedPreferences.getString("username", "")
-                    Log.d("user", user.toString())
+                //comprobamos que el nombre de la carta no exista
+                db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
                     for (i in it.children) {
-                        val usuario = i.getValue(UsuarioLogin::class.java)
-                        if (usuario != null && usuario.username == user.toString()) {
-                            Log.d("duro", posiblecartas[currentIndex].toString())
-                            var id_carta =
-                                db_ref.child("Uno").child("Tienda").push().key.toString()
-                            cartacreada.add(
-                                Carta(
-                                    user.toString(),
-                                    numero,
-                                    precio.toString().toInt(),
-                                    nombre,
-                                    descripcion,
-                                    id_carta,
-                                    posiblecartas[currentIndex]
-                                )
-                            )
+                        val carta = i.getValue(Carta::class.java)
+                        if (carta != null && carta.Nombre == nombre) {
+                            Toast.makeText(context, "Ya existe una carta con ese nombre", Toast.LENGTH_SHORT).show()
+                            return@addOnSuccessListener
+                        }else{
+                            db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
 
+                                var sharedPreferences: SharedPreferences =
+                                    context.getSharedPreferences("comun", MODE_PRIVATE)
+                                var user = sharedPreferences.getString("username", "")
+                                Log.d("user", user.toString())
+                                for (i in it.children) {
+                                    val usuario = i.getValue(UsuarioLogin::class.java)
+                                    if (usuario != null && usuario.username == user.toString()) {
+                                        Log.d("duro", posiblecartas[currentIndex].toString())
+                                        var id_carta =
+                                            db_ref.child("Uno").child("Tienda").push().key.toString()
+                                        cartacreada.add(
+                                            Carta(
+                                                user.toString(),
+                                                numero,
+                                                precio.toString().toInt(),
+                                                nombre,
+                                                descripcion,
+                                                id_carta,
+                                                posiblecartas[currentIndex]
+                                            )
+                                        )
+                                        Log.d("carta", cartacreada[0].toString())
+                                        EscribirCarta(db_ref, id_carta, cartacreada[0])
+                                        Toast.makeText(context, "Carta Creada", Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                    cartacreada.clear()
 
-
-                            EscribirCarta(db_ref, id_carta, cartacreada[0])
-                            Toast.makeText(context, "Carta Creada", Toast.LENGTH_SHORT)
-                                .show()
+                                }
+                            }
                         }
-                        cartacreada.clear()
-
                     }
                 }
+
 
             }
 

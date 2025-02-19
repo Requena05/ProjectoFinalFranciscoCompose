@@ -53,10 +53,12 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
@@ -81,10 +83,13 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -104,6 +109,7 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -148,6 +154,7 @@ class MenuDelJuegoAdministradorActivity : ComponentActivity() {
     }
 
 
+
 }
 
 @Composable
@@ -157,6 +164,89 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isDarkMode by remember { mutableStateOf(true) }
+    var buscarValor by rememberSaveable { mutableStateOf("") }
+
+    var arrayCarta = remember { mutableStateListOf<Carta>() }
+
+    var arrayCartaFiltrada = remember {
+        derivedStateOf {
+            arrayCarta.filter {
+                it.Nombre?.contains(buscarValor) == true
+            }
+        }
+    }
+
+    var db_ref = FirebaseDatabase.getInstance().reference
+    var cartaref by remember { mutableStateOf(db_ref.child("Uno").child("Tienda")) }
+
+    LaunchedEffect(key1 = true, key2 = vertienda) {
+        if (vertienda) {
+            cartaref = db_ref.child("Uno").child("Publicacion")
+        } else {
+            cartaref = db_ref.child("Uno").child("Tienda")
+        }
+
+        val valueEventListener = object : ValueEventListener {
+
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if(snapshot.childrenCount==0L){
+
+                    arrayCarta.clear()
+
+                }
+                for (i in snapshot.children) {
+                    val carta = i.getValue(Carta::class.java)
+                    if (carta != null) {
+                        arrayCarta += carta
+                        Log.d("array", arrayCarta.toString())
+                    }
+                    //comparamos el size de las cartas de firebase con el size de nuestro array local
+                    if (arrayCarta.size != snapshot.childrenCount.toInt()) {
+                        //ahora actualiza el array local
+                        arrayCarta.clear()
+                        for (i in snapshot.children) {
+                            val carta = i.getValue(Carta::class.java)
+                            if (carta != null) {
+                                arrayCarta += carta
+                                Log.d("array", arrayCarta.toString())
+                            }
+                        }
+                    }
+
+
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("error", error.toString())
+            }
+
+
+        }
+        cartaref.addValueEventListener(valueEventListener)
+
+
+
+        cartaref.get().addOnSuccessListener {
+            val tempArray = mutableListOf<Carta>()
+            for (i in it.children) {
+                val carta = i.getValue(Carta::class.java)
+                if (carta != null) {
+                    tempArray.add(carta)
+                }
+                //si en tempArray existen valores repetidos se eliminan
+                tempArray.distinct()
+            }
+            arrayCarta.clear()
+            arrayCarta.addAll(tempArray)
+            Log.d("array", arrayCarta.toString())
+            Log.d("arraysiez", arrayCarta.size.toString())
+        }
+
+
+    }
+
     // Track the mode
     Scaffold { innerPadding ->
         ModalNavigationDrawer(
@@ -169,10 +259,10 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                     drawerContainerColor = colorResource(R.color.black)
                 ) {
                     ExtendedFloatingActionButton(
-                        text = { Text("Perfil") },
+                        text = { Text("About") },
                         icon = {
                             Icon(
-                                Icons.Filled.AccountCircle,
+                                Icons.Filled.Warning,
                                 contentDescription = " ",
                                 modifier = Modifier
                                     .width(20.dp)
@@ -181,11 +271,12 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         },
                         onClick = {
                             scope.launch {
-                                Toast.makeText(context, "Perfil", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "About", Toast.LENGTH_SHORT).show()
 
                             }
                         },
                     )
+                    var notis by remember { mutableStateOf(0) }
                     Spacer(modifier = Modifier.height(16.dp))
                     Box {
                         ExtendedFloatingActionButton(
@@ -204,12 +295,14 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                             },
                             onClick = {
                                 scope.launch {
-                                    Log.d("<", "1")
+                                    var intent = Intent(context, VerPedidosActivity::class.java)
+                                    context.startActivity(intent)
+
                                 }
                             },
                         )
                         Text(
-                            text = "0",
+                            text = notis.toString(),
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .size(30.dp)
@@ -219,7 +312,7 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                                 )
                                 .border(2.dp, Color.Black, shape = RoundedCornerShape(100))
                                 .padding(3.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            textAlign = TextAlign.Center,
                             color = Color.Black,
                             fontSize = 12.sp
                         )
@@ -370,17 +463,19 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
 
                 }
             },
+            modifier = Modifier.background(colorResource(R.color.fondo))
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(innerPadding)
                     .background(colorResource(R.color.fondo2))
             ) {
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical =innerPadding.calculateTopPadding(),horizontal = 16.dp),
+                        .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -405,6 +500,23 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                                .wrapContentHeight()
                        )
                    }
+                    IconButton(modifier = Modifier.size(70.dp).align(Alignment.CenterVertically),onClick = {
+
+
+                        val intent = Intent(context, MenuEleccionPartidaActivity::class.java)
+                        intent.putExtra("tipo", 2)
+                        context.startActivity(intent)
+
+
+                    }
+                    ){
+                        Icon(
+                            Icons.Filled.Edit, contentDescription = "Editar partidas", modifier = Modifier
+                                .size(40.dp)
+                                .padding(2.dp)
+                        )
+
+                        }
 
                     IconButton(modifier = Modifier.size(70.dp).align(Alignment.CenterVertically), onClick = {
                         scope.launch {
@@ -422,6 +534,21 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         )
                     }
                 }
+                Column(modifier = Modifier.fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 16.dp))
+                {
+                    //Crearemos una barra para buscar cartas por nombre en la tienda
+                    TextField(modifier=Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(),value = buscarValor,
+                        onValueChange = {
+                            buscarValor = it
+                        },
+                        label = { Text("Buscar Carta") })
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                }
 
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -431,92 +558,18 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                 ) {
 
                     Row {
-                        CardSlider()
+                        CardSlider(arrayCartaFiltrada.value)
                     }
 
                 }
             }
-
-
         }
     }
 }
 
 
 @Composable
-fun CardSlider(modifier: Modifier = Modifier) {
-    var arrayCarta by remember { mutableStateOf<List<Carta>>(emptyList()) }
-    var db_ref = FirebaseDatabase.getInstance().reference
-    var cartaref by remember { mutableStateOf(db_ref.child("Uno").child("Tienda")) }
-
-    LaunchedEffect(key1 = true, key2 = vertienda) {
-        if (vertienda) {
-            cartaref = db_ref.child("Uno").child("Publicacion")
-        } else {
-            cartaref = db_ref.child("Uno").child("Tienda")
-        }
-
-        val valueEventListener = object : ValueEventListener {
-
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.childrenCount==0L){
-
-                    arrayCarta = emptyList()
-
-                }
-                for (i in snapshot.children) {
-                    val carta = i.getValue(Carta::class.java)
-                    if (carta != null) {
-                        arrayCarta += carta
-                        Log.d("array", arrayCarta.toString())
-                    }
-                    //comparamos el size de las cartas de firebase con el size de nuestro array local
-                    if (arrayCarta.size != snapshot.childrenCount.toInt()) {
-                        //ahora actualiza el array local
-                        arrayCarta = emptyList()
-                        for (i in snapshot.children) {
-                            val carta = i.getValue(Carta::class.java)
-                            if (carta != null) {
-                                arrayCarta += carta
-                                Log.d("array", arrayCarta.toString())
-                            }
-                        }
-                    }
-
-
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.d("error", error.toString())
-            }
-
-
-        }
-        cartaref.addValueEventListener(valueEventListener)
-
-
-
-        cartaref.get().addOnSuccessListener {
-            val tempArray = mutableListOf<Carta>()
-            for (i in it.children) {
-                val carta = i.getValue(Carta::class.java)
-                if (carta != null) {
-                    tempArray.add(carta)
-                }
-                //si en tempArray existen valores repetidos se eliminan
-                tempArray.distinct()
-            }
-            arrayCarta = tempArray
-            Log.d("array", arrayCarta.toString())
-            Log.d("arraysiez", arrayCarta.size.toString())
-        }
-
-
-    }
-
-
+fun CardSlider(arrayCarta: List<Carta>, modifier: Modifier = Modifier) {
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
@@ -524,11 +577,8 @@ fun CardSlider(modifier: Modifier = Modifier) {
             .height(600.dp),
     ) {
         Log.d("arra2ysize", arrayCarta.size.toString())
-        arrayCarta.forEach { card ->
-            Log.d("card", card.toString())
-            items(1) { index ->
-                AnimatedCard(card = card)
-            }
+        items(arrayCarta.size) { index ->
+            AnimatedCard(card = arrayCarta[index])
         }
     }
 }

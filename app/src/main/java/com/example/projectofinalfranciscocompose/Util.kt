@@ -37,7 +37,9 @@ class Util {
         fun CrearPartida(db_ref: DatabaseReference, id: String, partida: Partida) {
             db_ref.child("Uno").child("Partidas").child(id).setValue(partida)
         }
-
+        fun BorrarPartida(db_ref: DatabaseReference, id: String) {
+            db_ref.child("Uno").child("Partidas").child(id).removeValue()
+        }
 
 
 
@@ -51,12 +53,11 @@ class Util {
 
             Log.d("carta",carta.toString())
         }
-        fun BorrarCartasalmazo(db_ref: DatabaseReference, id: String, carta: Carta) {
-            //Tenemos que añadir la carta a publicacion
-            db_ref.child("Uno").child("Publicacion").child(carta.id.toString()).setValue(carta)
-            //Eliminamos la carta del mazo
-            db_ref.child("Uno").child("Mazos").child(id).child("lista_cartas").child(carta.id.toString()).removeValue()
+        fun CrearPedido(db_ref: DatabaseReference, id: String, pedido: Carta) {
+            db_ref.child("Uno").child("Pedido").child(id).child("lista_pedidos").child(pedido.Nombre.toString()).setValue(pedido)
         }
+
+
 
     }
 }

@@ -11,4 +11,6 @@
     <string name="title_activity_mazo">MazoActivity</string>
     <string name="title_activity_agregar_partida">AgregarPartidaActivity</string>
     <string name="title_activity_menu_eleccion_partida">MenuEleccionPartidaActivity</string>
+    <string name="title_activity_pedido">PedidoActivity</string>
+    <string name="title_activity_ver_pedidos">VerPedidosActivity</string>
 </resources>

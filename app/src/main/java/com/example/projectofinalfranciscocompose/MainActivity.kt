@@ -1,5 +1,6 @@
 package com.example.projectofinalfranciscocompose
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -69,7 +70,10 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        finishAffinity()
+    }
 
 }
 
