@@ -238,8 +238,8 @@ fun ListadoPartidas(modifier: Modifier = Modifier) {
                         } else {
                             db_ref.child("Uno").child("Partidas").get().addOnSuccessListener {
                                 var sharedPreferences: SharedPreferences =
-                                    context.getSharedPreferences("username", MODE_PRIVATE)
-                                var user = sharedPreferences.getString("username", "")
+                                    context.getSharedPreferences("comun", 0)
+                                var user = sharedPreferences.getString("id_creador", "")
                                 var id_partida = ""
                                 id_partida =
                                     db_ref.child("Uno").child("Partidas").push().key.toString()
@@ -261,6 +261,7 @@ fun ListadoPartidas(modifier: Modifier = Modifier) {
                                 partidacreada.tiempo_espera_partida = tiempo
                                 partidacreada.id_creador = user.toString()
                                 partidacreada.id_partida = id_partida
+                                //La lista de jugadores tiene que tener un maximo de la cantidad de jugadores
                                 partidacreada.lista_jugadores = mutableListOf()
                                 //Con un boton se le añadiran los jugadores
                                 //si se repite el nombre de la partida se le mostrara un mensaje de error

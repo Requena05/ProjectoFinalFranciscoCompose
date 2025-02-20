@@ -75,7 +75,7 @@ class AñadirCartaActivity : ComponentActivity() {
                     var context = LocalContext.current
                     var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
                     var editar = sp.getString("carta", " ")
-                    if (editar == " "){
+                    if (editar == "a"){
                         CrearCarta(modifier = Modifier.padding(innerPadding))
                     }else{
                         EditarCarta(modifier = Modifier.padding(innerPadding))
@@ -566,7 +566,7 @@ fun CrearCarta(modifier: Modifier = Modifier) {
             }else if( db_ref.child("Uno").child("Tienda").get().toString().contains(nombre)){
                 Toast.makeText(context, "Ya existe una carta con ese nombre", Toast.LENGTH_SHORT).show()
                 return@TextButton
-            } else if (descripcion.length > 50) {
+            } else if (descripcion.length >150) {
                 Toast.makeText(
                     context,
                     "La descripcion no puede tener mas de 50 caracteres",
@@ -581,12 +581,6 @@ fun CrearCarta(modifier: Modifier = Modifier) {
             } else {
                 //comprobamos que el nombre de la carta no exista
                 db_ref.child("Uno").child("Tienda").get().addOnSuccessListener {
-                    for (i in it.children) {
-                        val carta = i.getValue(Carta::class.java)
-                        if (carta != null && carta.Nombre == nombre) {
-                            Toast.makeText(context, "Ya existe una carta con ese nombre", Toast.LENGTH_SHORT).show()
-                            return@addOnSuccessListener
-                        }else{
                             db_ref.child("Uno").child("Usuarios").get().addOnSuccessListener {
 
                                 var sharedPreferences: SharedPreferences =
@@ -620,10 +614,6 @@ fun CrearCarta(modifier: Modifier = Modifier) {
                                 }
                             }
                         }
-                    }
-                }
-
-
             }
 
 

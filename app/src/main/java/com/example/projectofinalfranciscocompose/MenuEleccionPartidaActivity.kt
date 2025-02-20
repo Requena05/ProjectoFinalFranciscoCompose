@@ -2,6 +2,7 @@ package com.example.projectofinalfranciscocompose
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontFamily
@@ -466,9 +468,17 @@ fun AnimatedPartida2(partida: Partida) {
 
 
                     }
+                    var context = LocalContext.current
                     Row(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 10.dp)) {
                         //Crea dos botones para unirse a la partida o para salir de ella
-                        Button(onClick = { /*TODO*/ }) {
+                        Button(onClick = {
+                             //haz que el lista_JUGADORES.size se incremente pero nunca supere la cantidad de jugadores
+                            if (partida.lista_jugadores?.size!! < partida.cantidad_jugadores!!){
+                                partida.lista_jugadores?.size!! +1
+                            }else{
+                                Toast.makeText(context, "Partida llena", Toast.LENGTH_SHORT).show()
+                            }
+                        }) {
                             Text(text = "Unirse")
                         }
 

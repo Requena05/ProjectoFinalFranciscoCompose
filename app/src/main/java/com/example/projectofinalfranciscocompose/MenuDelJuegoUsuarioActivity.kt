@@ -282,12 +282,13 @@ fun MenuOpciones(modifier: Modifier = Modifier) {
                                     .height(30.dp)
                             )
                         },
+
                         onClick = {
                             scope.launch {
-                                val sharedPreferences = context.getSharedPreferences("comun", 0)
-                                sharedPreferences.edit().putBoolean("comun", false)
-                                sharedPreferences.edit().putInt("tipo",0)
 
+                                val sharedPreferences = context.getSharedPreferences("comun", 0)
+                                sharedPreferences.edit().putBoolean("islogued",false).apply()
+                                sharedPreferences.edit().putInt("tipo",0).apply()
                                 val intent = Intent(context, MainActivity::class.java)
                                 context.startActivity(intent)
                                 drawerState.close()

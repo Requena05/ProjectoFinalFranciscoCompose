@@ -376,6 +376,9 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                             var intent = Intent(context, AgregarPartidaActivity::class.java)
                             var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
                             //pasamos el id del usuario al intent
+                            sp.edit().putString("id_creador",sp.getString("username", "")).apply()
+                            Log.d("id_creador", sp.getString("username", "").toString())
+
 
 
                             context.startActivity(intent)
@@ -429,7 +432,7 @@ fun MenuDelAdministrador(modifier: Modifier = Modifier) {
                         onClick = {
                             scope.launch {
                                 var sp: SharedPreferences = context.getSharedPreferences("comun", 0)
-                                sp.edit().putString("carta", " ").apply()
+                                sp.edit().putString("carta", "a").apply()
                                 val intent = Intent(context, AñadirCartaActivity::class.java)
                                 context.startActivity(intent)
                             }
